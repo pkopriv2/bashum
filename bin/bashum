@@ -1,0 +1,56 @@
+#! /usr/bin/env bash
+
+export bashum_home=${bashum_home:-$HOME/.bashum}
+export bashums_home=${bashums_home:-$HOME/.bashum/bashums}
+
+source $bashum_home/lib/require.sh
+
+require 'lib/error.sh'
+require 'lib/info.sh'
+
+bashum_help() {
+	info "** Bashum Help **"
+	echo 
+
+	for command in $bashum_home/commands/*.sh
+	do
+		source $command
+
+		cmd=$(basename $command)
+		cmd=${cmd/.sh/}
+
+		"$cmd"_help "$@" 
+		echo
+	done
+}
+
+args=( "${@}" )
+action="${args[0]}"
+
+if [[ -z $action ]] 
+then
+	bashum_help
+	exit $?
+fi
+shift
+
+if [[ ! -f $bashum_home/commands/"$action".sh ]]
+then
+	case "$action" in
+		help|-h|--help)
+			shift
+			bashum_help "$@"
+			;;
+		*)
+			error "That sub-command is not supported."
+			echo
+			bashum_help
+			;;
+	esac
+
+	exit $?
+fi
+
+require "commands/$action.sh"
+$action "$@"
+exit $?

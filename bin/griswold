@@ -1,0 +1,194 @@
+#! /bin/bash
+
+set -o errexit
+set -o errtrace
+
+source ${rr_home:-$HOME/.rr}/require.sh
+
+require "lib/msg.sh"
+
+griswold_help() {
+	local detailed=false
+	while [[ $# -gt 0 ]]
+	do
+		arg="$1"
+
+		case "$arg" in
+			-d|--detailed)
+				detailed=true
+				;;
+		esac
+		shift
+	done
+
+	echo "griswold -b <base> -o <output_file> [tar options] file1 .. filen "
+
+	if ! $detailed 
+	then
+		return 0
+	fi
+
+	printf "%s\n" "
+OPTIONS:
+  -b|--base       Apply the base context to the input files.
+  -o|--output     The output tar file.
+  -C|--context    The context to tar up the files.  The files are added relative to the context.
+
+  Also supports *most* tar options.  However, -f,--file,--append,-h are not allowed and 
+  griswold will throw an error.
+
+"
+}
+
+# This is essentially a wrapper for tar. we'll need to store
+# off 
+tar_args=()
+
+# All the normal positional params are input files.
+files=()
+
+# Gather all the options from teh command line.
+while [[ $# -gt 0 ]]
+do
+	arg="$1"
+
+	case "$arg" in
+		-h|--help)
+			griswold_help --detailed
+			exit 0
+    		;;
+		-b|--base)
+			shift
+			base_dir="$1"
+    		;;
+		-o|--output)
+			shift
+			out="$1"
+    		;;
+		-C|-c|--context)
+			shift
+			context="$1"
+			;;
+		-f|--file|-r|--append|-h)
+			error "That arg [$arg] is not allowed"
+			exit 1
+    		;;
+		-*)
+			shift
+			tar_args+=("$1")
+    		;;
+		*)
+			files+=("$1")
+    		;;
+	esac
+
+	shift
+done
+
+# ensure that at least one input file has been given.
+if [[ ${#files[@]} -eq 0 ]]
+then
+	error "Must provide at least one input file."
+	exit 1
+fi
+
+# ensure that the output file has been specified.
+if [[ -z $out ]]
+then
+	error "Must provide an output file."
+	exit 1
+fi
+
+# get the absolute path of of the output file.
+if [[ ! -d $(dirname $out) ]]
+then
+	error "That output directory doesn't exist."
+	exit 1
+fi 
+
+out=$( builtin cd $(dirname $out); echo $(pwd)/$(basename $out) )
+
+# handle the context (we will want to move the current shell to that directory.
+if [[ ! -z $context ]]
+then
+	if [[ ! -d $context ]]
+	then
+		error "That context directory [$context] doesn't exist."
+		exit 1
+		
+	fi 
+
+	builtin cd $context
+fi
+
+# ensure that the tmp directory exists.
+tmp_dir=${tmp_dir:-"/tmp"}
+if [[ ! -d $tmp_dir ]] 
+then
+	error "Tmp directory [$tmp_dir] doesn't exist."
+	exit 1
+fi
+
+# if a base directory has been provided, we want to create the
+# base directory under /tmp/griswold and then tar up the files
+# under the /tmp/griswold context.
+if [[ ! -z $base_dir ]]
+then
+	if echo $base_dir | grep -q "^\/" 
+	then
+		error "Base directory must be a relative path"	
+		exit 1
+	fi 
+
+	if echo $base_dir | grep -q "\/" && echo $base_dir | grep -q -v "\/$"
+	then
+		base_base_dir=$(dirname $base_dir)
+	else
+		base_base_dir=""
+	fi 
+
+	link_dir=$tmp_dir/griswold/$base_base_dir
+	mkdir -p $link_dir || (
+		error "Error creating base directory: $link_dir"
+		exit 1
+	)
+
+	link_dir=$link_dir/$(basename $base_dir)
+else
+	link_dir=$tmp_dir/griswold
+fi
+
+ln -s $(pwd) $link_dir || (
+	error "Error applying base_dir [${base_dir:-"."}]"
+	exit 1
+)
+
+on_exit() {
+	rm -f $link_dir	
+	rm -rf $tmp_dir/griswold
+}
+
+on_error() {
+	rm -f $out 
+}
+
+trap "on_exit" INT EXIT
+
+builtin cd $tmp_dir/griswold
+
+for file in "${files[@]}"
+do
+	if [[ ! -z $base_dir ]]
+	then
+		file=$base_dir/$file
+	fi
+
+	if [[ ! -f $file ]] && [[ ! -d $file ]] 
+	then
+		error "That file [$file] doesn't exist"
+		on_error
+		exit 1
+	fi
+
+	tar -h "${tar_args[*]}" --file $out --append $file
+done
