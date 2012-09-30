@@ -46,11 +46,9 @@ fi
 
 griswold -o $out                     \
 		 -c $rr_home                 \
-		 -b remote-runner-$version   \
+		 -b bashum-$version          \
 		  bin                        \
-		  dsl                        \
 		  env                        \
 		  lib                        \
-		  scripts                    \
+		  commands                   \
 		  env.sh                     \
-		  require.sh                                       

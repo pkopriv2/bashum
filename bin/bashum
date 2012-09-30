@@ -1,12 +1,18 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$HOME/.bashum/bashums}
+export bashums_home=${bashums_home:-$bashum_home/bashums}
 
 source $bashum_home/lib/require.sh
 
 require 'lib/error.sh'
 require 'lib/info.sh'
+
+# ensure all the required directories are there.
+if [[ ! -d $bashums_home ]]
+then
+	mkdir -p $bashums_home 
+fi
 
 bashum_help() {
 	info "** Bashum Help **"

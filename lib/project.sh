@@ -4,6 +4,7 @@ require 'lib/error.sh'
 require 'lib/info.sh'
 require 'lib/fail.sh'
 
+
 # loads the given project file into the current shell
 # environment.
 project_load_file() {
@@ -32,6 +33,11 @@ project_load_file() {
 		description=$1
 	}
 
+	dependencies=()
+	depends() {
+		dependencies+=( "$1:$2" )
+	}
+
 	source $1
 
 	# ensure that everything was set appropriately
@@ -50,16 +56,22 @@ project_load_file() {
 	unset -f name
 	unset -f version
 	unset -f description
+	unset -f depends
 }
 
 project_get_home() {
+	if [[ -z $1 ]]
+	then
+		fail 'Must provide a project name.'
+	fi
+
 	echo "$bashums_home/$1"
 }
 
 project_get_executables() {
 	if [[ -z $1 ]]
 	then
-		fail 'Must provide a package.'
+		fail 'Must provide a project name.'
 	fi
 
 	local project_home=$(project_get_home "$1")
@@ -89,7 +101,7 @@ project_get_executables() {
 project_generate_executables() {
 	if [[ -z $1 ]]
 	then
-		fail 'Must provide a package name'
+		fail 'Must provide a project name'
 	fi
 
 	local name="$1"
@@ -97,7 +109,7 @@ project_generate_executables() {
 	do
 		# grab the executable name
 		local base_name=$(basename $executable) 
-		echo "creating bashum executable: $base_name"
+		echo "Creating executable: $base_name"
 
 		# update the file permissions
 		chmod a+x $executable
@@ -106,7 +118,7 @@ project_generate_executables() {
 		local out=$bashum_bin_dir/$base_name
 		if [[ -f $out ]]
 		then
-			echo "executable [$out] already exists.  removing."
+			echo "Executable [$out] already exists."
 			rm $out
 		fi 
 
@@ -128,5 +140,39 @@ project_generate_executables() {
 
 		# make it executable. bam!
 		chmod a+x $out
+	done
+}
+
+project_remove_executables() {
+	if [[ -z $1 ]]
+	then
+		fail 'Must provide a package name'
+	fi
+
+	local name="$1"
+	for executable in $(project_get_executables "$name" ) 
+	do
+		# grab the executable package_name 
+		local base_name=$(basename $executable) 
+
+		# derive where the bashum wrapper *should* be.
+		local wrapper=$bashum_bin_dir/$base_name
+
+		# can't do much if there is not a file.
+		if [[ ! -f $wrapper ]]
+		then
+			continue
+		fi 
+
+		# see if this is the *right* executable.  if there are conflicting
+		# executables from separate packages, this should prevent us
+		# from deleting the wrong one.
+		if ! cat $wrapper | grep -q "source \$bashums_home/$name/bin/$base_name" 
+		then
+			continue		
+		fi
+
+		echo "Removing executable: $base_name"
+		rm $wrapper
 	done
 }
