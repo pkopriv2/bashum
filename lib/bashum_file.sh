@@ -74,37 +74,6 @@ bashum_file_validate() {
 		fi
 	done
 
-	# ensure each dependency is satisfied.
-	local orig_name=$name
-	local orig_version=$version
-
-
-	declare local dep 
-	for dep in "${dependencies[@]}"
-	do
-		local dep_name=${dep%%:*}
-		local dep_version_expected=${dep##*:}
-
-		local dep_home=$(package_get_home "$dep_name")
-		if [[ ! -d $dep_home ]]
-		then
-			error "Missing dependency: $dep_name${dep_version_expected:+":$dep_version_expected"}"
-			exit 1
-		fi
-
-		if [[ -z $dep_version_expected ]]
-		then
-			continue
-		fi
-
-		local dep_project_file=$dep_home/project.sh
-		(
-			project_load_file "$dep_project_file"
-			if [[ "$version" < "$dep_version_expected" ]]
-			then
-				error "Required version [$dep_version_expected] of [$dep_name] not found.  Currently, version [$version] is installed." 
-				exit 1
-			fi
-		) || exit 1
-	done
+	# validate the dependencies.
+	project_file_validate_dependencies $project_file
 }

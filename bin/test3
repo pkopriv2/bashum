@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+export bashum_home=${bashum_home:-$HOME/.bashum}
+export bashums_home=${bashums_home:-$bashum_home/bashums}
+
+# source our standard 'require' funciton.
+source $bashum_home/lib/require.sh
+
+# update the bashums path to include the /lib folder of this bashum
+export bashums_path=$bashums_home/test-project:$bashums_path
+
+# go ahead and execute the original executable
+source $bashums_home/test-project/bin/test3 "$@"

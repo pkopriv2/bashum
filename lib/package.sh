@@ -78,7 +78,7 @@ package_generate_executables() {
 			export bashums_path=\$bashums_home/$name:\$bashums_path
 
 			# go ahead and execute the original executable
-			source \$bashums_home/$name/bin/$base_name
+			source \$bashums_home/$name/bin/$base_name "\$@"
 		eof
 
 		# make it executable. bam!

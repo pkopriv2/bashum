@@ -21,14 +21,13 @@ if [[ -d $bashum_tmp_dir ]]
 then
 	rm -r $bashum_tmp_dir
 fi
-mkdir -p $bashum_tmp_dir
 
+mkdir -p $bashum_tmp_dir
 
 # set basic traps 
 on_exit() {
 	rm -r $bashum_tmp_dir
-}; trap "on_exit" INT EXIT
-
+}; trap "on_exit" EXIT
 
 bashum_help() {
 	bold "BASHUM HELP"

@@ -91,7 +91,7 @@ build() {
 	fi
 
 	# package up everything.
-	info "Building project." 
+	info "Building project: " 
 	echo 
 
 	# load the project file.

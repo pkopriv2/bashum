@@ -12,5 +12,8 @@ fi
 # source any extra environment scripts (provided by bashums)
 for script in $(ls $bashum_home/*/env/*.sh)
 do
-	source $script
+	if [[ -f $script ]]
+	then
+		source $script
+	fi
 done

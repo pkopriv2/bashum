@@ -60,6 +60,7 @@ project_file_load() {
 	}
 
 	source $1
+	bashum_project_file_loaded=$1 
 
 	# ensure that everything was set appropriately
 	if [[ -z "$name" ]]
@@ -149,5 +150,49 @@ project_file_print() {
 			echo "    - $dep_name${dep_version:+":$dep_version"}"
 		done
 	fi
+}
+
+project_file_validate_dependencies() {
+	if [[ -z "$1" ]]
+	then
+		fail 'Must provide a project file.'
+	fi
+
+	# load the project file.
+	project_file_load $1
+
+	# ensure each dependency is satisfied.
+	local orig_name=$name
+	local orig_version=$version
+
+
+	declare local dep 
+	for dep in "${dependencies[@]}"
+	do
+		local dep_name=${dep%%:*}
+		local dep_version_expected=${dep##*:}
+
+		local dep_home=$(package_get_home "$dep_name")
+		if [[ ! -d $dep_home ]]
+		then
+			error "Missing dependency: $dep_name${dep_version_expected:+":$dep_version_expected"}"
+			exit 1
+		fi
+
+		if [[ -z $dep_version_expected ]]
+		then
+			continue
+		fi
+
+		local dep_project_file=$dep_home/project.sh
+		(
+			project_load_file "$dep_project_file"
+			if [[ "$version" < "$dep_version_expected" ]]
+			then
+				error "Required version [$dep_version_expected] of [$dep_name] not found.  Currently, version [$version] is installed." 
+				exit 1
+			fi
+		) || exit 1
+	done
 
 }
