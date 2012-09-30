@@ -8,30 +8,49 @@ export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 require 'lib/error.sh'
 require 'lib/string.sh'
 require 'lib/info.sh'
+require 'lib/font.sh'
 require 'lib/fail.sh'
+require 'lib/help.sh'
 require 'lib/package.sh'
-require 'lib/project.sh'
+require 'lib/project_file.sh'
+require 'lib/bashum_file.sh'
 
-if [[ -d $bashum_tmp_dir ]] 
-then
-	rm -r $bashum_tmp_dir
-fi
-mkdir -p $bashum_tmp_dir
-
-on_exit() {
-	rm -r $bashum_tmp_dir
-}; trap "on_exit" INT EXIT
-
-install_help() {
-	echo;
+install_usage() {
+	echo "$bashum_cmd install <package> [options]"
 }
 
+install_help() {
+	bold 'USAGE'
+	echo 
+	printf "\t"; install_usage
+	echo
 
-# Usage: install <package>
-#
-# Installs or updates a package
-#
+
+	bold 'DESCRIPTION'
+	printf '%s' '
+	Validates and installs the the specified bashum file to the local
+	bashum repo ($bashums_home).  In order to pass validation,
+	the bashum file must have the proper strucutre as described by
+	its project.sh file and all the dependencies must be satisfied.
+
+	Note: <package> can be a local file or a url.  
+
+'
+
+	bold 'OPTIONS'
+	printf '%s' '
+	-None 
+
+'
+}
+
 install() {
+	if help? "$@" 
+	then
+		install_help "$@"
+		exit $?
+	fi
+
 	if ! command -v tar &> /dev/null
 	then
 		error "Installation requires a working version of tar." 
@@ -41,34 +60,45 @@ install() {
 	if [[ -z "$1" ]]
 	then
 		error "Must provide either a package name or url."
+		echo 
+
+		echo -n 'USAGE: '; install_usage 
 		exit 1
 	fi
 
-	local file="$1"
-	if ! is_local? "$file" 
+	local bashum_file="$1"
+	if ! is_local? "$bashum_file" 
 	then
-		local file=$bashum_tmp_dir/$(str_random) 
-		package_download "$1" "$file"
+		local bashum_file=$bashum_tmp_dir/$(str_random) 
+		bashum_file_download "$1" "$bashum_file"
 	fi
 
-	if [[ ! -f "$file" ]]
+	if [[ ! -f "$bashum_file" ]]
 	then
-		error "That package [$file] doesn't exist."
+		error "That package [$bashum_file] doesn't exist."
 		exit 1
 	fi
 
-	package_validate "$file"
-	info "Installing package: $name"
+	info "Installing bashum file: $bashum_file"
+	echo 
 
-	#local project_home=$(project_get_home "$name")
-	#if [[ -d $project_home ]] 
-	#then
-		#rm -r $project_home
-	#fi
+	local project_file=$(bashum_file_extract_project_file "$bashum_file")
+	project_file_print "$project_file"
+	echo 
 
-	tar -xf "$file" -C $bashums_home
+	echo -n "Validating bashum file. "
+	bashum_file_validate "$bashum_file"
+	echo "Done."
 
-	project_generate_executables "$name"
+	echo -n "Unpacking bashum file. "
+	tar -xf "$bashum_file" -C $bashums_home
+	echo "Done."
+
+	echo -n "Generating executables. " 
+	package_generate_executables "$name"
+	echo "Done."
+	echo
+
 	info "Successfully installed package: $name" 
 	info "Please re-source your environment (open a new terminal session)." 
 }

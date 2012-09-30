@@ -4,41 +4,70 @@ export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashums_home=${bashums_home:-$bashum_home/bashums}
 
 require 'lib/info.sh'
-require 'lib/project.sh'
+require 'lib/project_file.sh'
+require 'lib/help.sh'
+require 'lib/font.sh'
+
+list_usage() {
+	echo "$bashum_cmd list [options]"
+}
+
+list_help() {
+	bold 'USAGE'
+	echo
+	printf "\t"; list_usage
+	echo
+
+
+	bold 'DESCRIPTION'
+	printf '%s' '
+	Lists all of the currently installed bashums.
+
+'
+
+	bold 'OPTIONS'
+	printf '%s' '
+	-d|--detailed    Prints the descriptions of the bashums.
+
+'
+} 
 
 list() {
+	if help? "$@"
+	then
+		shift 
+		list_help "$@"
+		exit $?
+	fi
+
 	local detailed=false
 	while [[ $# -gt 0 ]]
 	do
 		arg="$1"
+		shift
 
 		case "$arg" in
 			-d|--detailed)
 				detailed=true
 				;;
 		esac
-		shift
 	done
 	
-	info "** Currently installed bashums **"
+	info "Installed Bashums: "
 	echo
 
 
 	for project_file in $(ls $bashums_home/*/project.sh)
 	do
-		project_load_file $project_file
-		echo -n "  - $name [$version]"
+		project_file_load $project_file
+		printf "\t- %s" "$name [$version]" 
 
 		if [[ -n $description ]] && $detailed
 		then
-			echo " - $description"
+			echo "    - $description"
 		else 
 			echo
 		fi
 	done
 		
 }
-
-list_help() {
-	echo;
-} 

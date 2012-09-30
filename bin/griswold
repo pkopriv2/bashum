@@ -53,7 +53,7 @@ do
 	arg="$1"
 
 	case "$arg" in
-		-h|--help)
+		-h|--help|help)
 			griswold_help --detailed
 			exit 0
     		;;

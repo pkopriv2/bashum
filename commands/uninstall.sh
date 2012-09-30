@@ -5,22 +5,57 @@ export bashums_home=${bashums_home:-$bashum_home/bashums}
 export bashum_bin_dir=${bashum_bin_dir:-$bashum_home/bin}
 
 require 'lib/error.sh'
+require 'lib/font.sh'
 require 'lib/info.sh'
 require 'lib/fail.sh'
-require 'lib/project.sh'
+require 'lib/help.sh'
+require 'lib/project_file.sh'
+require 'lib/package.sh'
+
+uninstall_usage() {
+	echo "$bashum_cmd uninstall <package> [options]"
+}
 
 uninstall_help() {
-	echo;
+	bold 'USAGE'
+	echo 
+	printf "\t"; uninstall_usage
+	echo
+
+
+	bold 'DESCRIPTION'
+	printf '%s' '
+	Uninstalls the specified bashum package from the local repo.
+
+	This may require resourcing the environment if the specfied
+	package contained 'sourced' environment files.
+
+'
+
+	bold 'OPTIONS'
+	printf '%s' '
+	-None 
+
+'
 }
 
 uninstall() {
+	if help? "$@" 
+	then
+		uninstall_help "$@"
+		exit $?
+	fi
+
 	if [[ -z "$1" ]]
 	then
 		error "Must provide a package name."
+		echo 
+
+		echo -n 'USAGE: '; uninstall_usage 
 		exit 1
 	fi
 
-	local package_home=$(project_get_home "$1")
+	local package_home=$(package_get_home "$1")
 	if [[ ! -d "$package_home" ]]
 	then
 		error "That package [$package_home] is not installed"
@@ -36,7 +71,7 @@ uninstall() {
 		exit 0
 	fi
 
-	project_remove_executables "$1"
+	package_remove_executables "$1"
 	rm -r $package_home
 
 	info "Successfully uninstalled: $1"

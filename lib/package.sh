@@ -1,102 +1,124 @@
 #! /usr/bin/env bash
 
-export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$bashum_home/bashums}
-export bashum_bin_dir=${bashum_bin_dir:-$bashum_home/bin}
-
 require 'lib/error.sh'
 require 'lib/info.sh'
 require 'lib/fail.sh'
-require 'lib/project.sh'
 
-
-# download_package <url> <target> 
-package_download() {
-	info "Downloading bashum package: $1"
-
-	if command -v curl &> /dev/null
+package_get_home() {
+	if [[ -z $1 ]]
 	then
-		if ! curl -L $1 > $2
-		then
-			error "Error downloading: $1.  Either cannot download or cannot write to file: $2"
-			exit 1
-		fi
-
-	elif command -v wget &> /dev/null
-	then
-		if ! wget -q -O $2 $1
-		then
-			error "Error downloading: $1.  Either cannot download or cannot write to file: $2"
-			exit 1
-		fi
-
-	else
-		error "This installation requires either curl or wget."
-		exit 1
+		fail 'Must provide a project name.'
 	fi
+
+	echo "$bashums_home/$1"
 }
 
-# Validates the contents of a pacakge.
-package_validate() {
-
-	# locate the required <name>/project_file.sh
-	local project_file=$(tar -tf $1 | grep '^[^/]*/project.sh')
-	if [[ -z $project_file ]]
+package_get_executables() {
+	if [[ -z $1 ]]
 	then
-		error "Package [$1] is missing a project.sh file."
+		fail 'Must provide a project name.'
+	fi
+
+	local package_home=$(package_get_home "$1")
+	if [[ ! -d $package_home ]] 
+	then
+		error "Package [$1] is not installed."
 		exit 1
 	fi
 
-	# extract the project file (to temp location)
-	if ! tar -C $bashum_tmp_dir -xvf "$1" "$project_file" &> /dev/null
+	local bin_dir=$package_home/bin
+	if [[ ! -d $bin_dir ]] 
 	then
-		error "That package [$1] is corrupted"
-		exit 1
+		return 0 
 	fi
 
-	# load the project file.
-	project_load_file $bashum_tmp_dir/"$project_file"
-
-	# ensure that the structure is expected.
-	declare local file
-	for file in $(tar -tf $1) 
+	for executable in $(ls $bin_dir/*) 
 	do
-		if ! echo "$file" | grep -q "^$name"
-		then
-			error "That package [$1] is corrupted.  Unexpected file: $file"
-			exit 1
-		fi
-	done
-
-	# ensure each dependency is satisfied.
-	local orig_name=$name
-	local orig_version=$version
-
-	for dep in "${dependencies[@]}"
-	do
-		local dep_name=${dep%%:*}
-		local dep_version_expected=${dep##*:}
-
-		local dep_home=$(project_get_home "$dep_name")
-		if [[ ! -d $dep_home ]]
-		then
-			error "Missing dependency: $dep_name${dep_version_expected:+":$dep_version_expected"}"
-			exit 1
-		fi
-
-		if [[ -z $dep_version_expected ]]
+		if [[ ! -f $executable ]]
 		then
 			continue
 		fi
 
-		local dep_project_file=$dep_home/project.sh
-		(
-			project_load_file "$dep_project_file"
-			if [[ "$version" < "$dep_version_expected" ]]
-			then
-				error "Required version [$dep_version_expected] of [$dep_name] not found.  Currently, version [$version] is installed." 
-				exit 1
-			fi
-		) || exit 1
+		echo $executable
+	done
+}
+
+package_generate_executables() {
+	if [[ -z $1 ]]
+	then
+		fail 'Must provide a project name'
+	fi
+
+	local name="$1"
+	for executable in $(package_get_executables "$name" ) 
+	do
+		# grab the executable name
+		local base_name=$(basename $executable) 
+
+		# update the file permissions
+		chmod a+x $executable
+
+		# determine where we're going to put the executable
+		local out=$bashum_bin_dir/$base_name
+		if [[ -f $out ]]
+		then
+			rm $out
+		fi 
+
+		# create the new executable
+		cat - > $out <<-eof
+			#! /usr/bin/env bash
+			export bashum_home=\${bashum_home:-\$HOME/.bashum}
+			export bashums_home=\${bashums_home:-\$bashum_home/bashums}
+
+			# source our standard 'require' funciton.
+			source \$bashum_home/lib/require.sh
+
+			# update the bashums path to include the /lib folder of this bashum
+			export bashums_path=\$bashums_home/$name:\$bashums_path
+
+			# go ahead and execute the original executable
+			source \$bashums_home/$name/bin/$base_name
+		eof
+
+		# make it executable. bam!
+		chmod a+x $out
+	done
+}
+
+package_remove_executables() {
+	if [[ -z $1 ]]
+	then
+		fail 'Must provide a package name'
+	fi
+
+	local name="$1"
+	for executable in $(package_get_executables "$name" ) 
+	do
+		# grab the executable package_name 
+		local base_name=$(basename $executable) 
+
+		# derive where the bashum wrapper *should* be.
+		local wrapper=$bashum_bin_dir/$base_name
+
+		# can't do much if there is not a file.
+		if [[ ! -f $wrapper ]]
+		then
+			continue
+		fi 
+
+		# see if this is the *right* executable.  if there are conflicting
+		# executables from separate packages, this should prevent us
+		# from deleting the wrong one.
+		if ! cat $wrapper | grep -q "source \$bashums_home/$name/bin/$base_name" 
+		then
+			continue		
+		fi
+
+		if ! rm $wrapper 
+		then
+			error "Error deleting file [$wrapper]"
+			exit 1 
+		fi
 	done
 }

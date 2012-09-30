@@ -1,12 +1,15 @@
 #! /usr/bin/env bash
 
+export bashum_cmd=${bashum_cmd:-bashum}
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashums_home=${bashums_home:-$bashum_home/bashums}
+export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 source $bashum_home/lib/require.sh
 
 require 'lib/error.sh'
 require 'lib/info.sh'
+require 'lib/font.sh'
 
 # ensure all the required directories are there.
 if [[ ! -d $bashums_home ]]
@@ -14,9 +17,30 @@ then
 	mkdir -p $bashums_home 
 fi
 
+if [[ -d $bashum_tmp_dir ]] 
+then
+	rm -r $bashum_tmp_dir
+fi
+mkdir -p $bashum_tmp_dir
+
+
+# set basic traps 
+on_exit() {
+	rm -r $bashum_tmp_dir
+}; trap "on_exit" INT EXIT
+
+
 bashum_help() {
-	info "** Bashum Help **"
+	bold "BASHUM HELP"
 	echo 
+
+	printf "%s\n" '
+	Bashum is a package manager for bash projects.  It provides support
+	for building, installing, and maintaining .bashum files.  
+'
+
+	bold "COMMANDS"
+	echo
 
 	for command in $bashum_home/commands/*.sh
 	do
@@ -25,9 +49,15 @@ bashum_help() {
 		cmd=$(basename $command)
 		cmd=${cmd/.sh/}
 
-		"$cmd"_help "$@" 
-		echo
+		printf "\t"; "$cmd"_usage "$@" 
 	done
+	echo 
+
+	bold 'MORE INFO'
+	printf "%s\n" '
+	To get more detailed help, simply type bashum <command> help [--detailed]
+
+'
 }
 
 args=( "${@}" )
@@ -44,8 +74,7 @@ if [[ ! -f $bashum_home/commands/"$action".sh ]]
 then
 	case "$action" in
 		help|-h|--help)
-			shift
-			bashum_help "$@"
+			bashum_help 
 			;;
 		*)
 			error "That sub-command is not supported."
