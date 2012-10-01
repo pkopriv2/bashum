@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$bashum_home/bashums}
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
 
 require 'lib/info.sh'
 require 'lib/project_file.sh'
@@ -57,7 +57,7 @@ list() {
 	echo
 
 
-	for project_file in $(ls $bashums_home/*/project.sh)
+	for project_file in $(ls $bashum_repo/packages/*/project.sh 2>/dev/null)
 	do
 		project_file_load $project_file
 		printf "\t- %s" "$name [$version]" 

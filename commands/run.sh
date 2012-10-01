@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_path=${bashums_path:-"$bashum_home:$bashum_home/bashums"}
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
 export bashum_project_file=${bashum_project_file:-"project.sh"}
 
 require 'lib/error.sh'
@@ -72,7 +73,7 @@ run() {
 
 	local cwd=$(pwd)
 	export PATH=$cwd/bin:$PATH
-	export bashums_path=$cwd:$bashums_path
+	export bashum_path=$cwd:$bashum_path
 
 	(
 		if [[ -d env ]]

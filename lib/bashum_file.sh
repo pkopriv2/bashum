@@ -55,7 +55,6 @@ bashum_file_extract_project_file() {
 	echo "$bashum_tmp_dir/$project_file" 
 }
 
-# Validates the contents of a pacakge.
 bashum_file_validate() {
 	# package_info
 	local project_file=$(bashum_file_extract_project_file $1) 

@@ -1,8 +1,6 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$bashum_home/bashums}
-export bashum_bin_dir=${bashum_bin_dir:-$bashum_home/bin}
 
 require 'lib/error.sh'
 require 'lib/font.sh'
@@ -72,7 +70,11 @@ uninstall() {
 	fi
 
 	package_remove_executables "$1"
-	rm -r $package_home
+	if ! rm -r $package_home
+	then
+		error "Error deleting package: $package_home"
+		exit 1
+	fi
 
 	info "Successfully uninstalled: $1"
 	echo

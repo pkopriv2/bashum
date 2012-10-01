@@ -1,9 +1,10 @@
 # /usr/bin/env bash
 
 export bashum_home=${bashum_home:-"$HOME/.bashum"}
-export bashums_path=${bashums_path:-"$bashum_home:$bashum_home/bashums"}
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
 
-declare -A bashums_requires=()
+declare -A bashum_requires=()
 
 require() {
 	if [[ -z $1 ]]
@@ -13,7 +14,9 @@ require() {
 		exit 1
 	fi
 
-	if [[ "${bashums_requires["$1"]}" == "1" ]]
+	# can this be better?  we're not actually checking against the 'actual'
+	# script, but the script as 'required'.  
+	if [[ "${bashum_requires["$1"]}" == "1" ]]
 	then
 		return 0 
 	fi
@@ -21,7 +24,8 @@ require() {
 	_IFS=$IFS
 	IFS=":"
 
-	for path in $bashums_path 
+	declare local path
+	for path in $bashum_path 
 	do
 		local script=$path/$1
 		if [[ ! -f $script ]]
@@ -32,7 +36,7 @@ require() {
 		IFS=$_IFS
 
 		source $script
-		bashums_requires["$script"]="1"
+		bashum_requires["$1"]="1" 
 		return 0
 	done
 

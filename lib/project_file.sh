@@ -165,7 +165,6 @@ project_file_validate_dependencies() {
 	local orig_name=$name
 	local orig_version=$version
 
-
 	declare local dep 
 	for dep in "${dependencies[@]}"
 	do
@@ -194,5 +193,4 @@ project_file_validate_dependencies() {
 			fi
 		) || exit 1
 	done
-
 }

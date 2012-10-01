@@ -18,7 +18,14 @@ error() {
 	fi
 }
 
-version=$(cat $rr_home/project.txt | awk '{print $2;}')
+
+if [[ ! -f project.txt ]]
+then
+	error "Must be in the root of the project directory."
+	exit 1
+fi
+
+version=$(cat project.txt | awk '{print $2;}')
 while [[ $# -gt 0 ]]
 do
 	arg="$1"
@@ -36,19 +43,17 @@ done
 
 info "Packaging version: $version" 
 
-mkdir -p $rr_home/target
+mkdir -p target
 
-out=$rr_home/target/remote-runner-$version.tar
+out=$rr_home/target/bashum-$version.tar
 if [[ -f $out ]] 
 then
 	rm -f $out
 fi
 
 griswold -o $out                     \
-		 -c $rr_home                 \
-		 -b bashum-$version          \
+		 -b .bashum                  \
 		  bin                        \
-		  env                        \
 		  lib                        \
 		  commands                   \
 		  env.sh                     \

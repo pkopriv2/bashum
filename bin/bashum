@@ -2,7 +2,7 @@
 
 export bashum_cmd=${bashum_cmd:-bashum}
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$bashum_home/bashums}
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 source $bashum_home/lib/require.sh
@@ -12,9 +12,9 @@ require 'lib/info.sh'
 require 'lib/font.sh'
 
 # ensure all the required directories are there.
-if [[ ! -d $bashums_home ]]
+if [[ ! -d $bashum_repo ]]
 then
-	mkdir -p $bashums_home 
+	mkdir -p $bashum_repo 
 fi
 
 if [[ -d $bashum_tmp_dir ]] 
@@ -24,10 +24,12 @@ fi
 
 mkdir -p $bashum_tmp_dir
 
-# set basic traps 
+# cleanup on exit.
 on_exit() {
 	rm -r $bashum_tmp_dir
-}; trap "on_exit" EXIT
+} 
+
+trap "on_exit" EXIT
 
 bashum_help() {
 	bold "BASHUM HELP"

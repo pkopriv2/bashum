@@ -66,14 +66,14 @@ then
 	exit 1
 fi 
 
-env_files=( "~/.bashrc" "~/.zshrc" ) 
+env_files=( "~/.bashrc" ".bash_profile" "~/.zshrc" ) 
 for file in "${env_files[@]}"
 do
 	eval "file=$file" # expand the path correctly
 
 	if [[ ! -f $file ]]
 	then
-		continue
+		touch $file 
 	fi
 
 	if grep -q "source ~/.bashum/env.sh" $file
@@ -95,4 +95,4 @@ do
 	fi
 done
 
-info "Successfully installed bashum!  Please source your environment for changes to take effect."
+info "Successfully installed bashum!  Please source your environment for changes to take effect. (Start a new terminal session)"

@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashums_home=${bashums_home:-$bashum_home/bashums}
-export bashum_bin_dir=${bashum_bin_dir:-$bashum_home/bin}
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 require 'lib/error.sh'
@@ -29,7 +28,7 @@ install_help() {
 	bold 'DESCRIPTION'
 	printf '%s' '
 	Validates and installs the the specified bashum file to the local
-	bashum repo ($bashums_home).  In order to pass validation,
+	bashum repo ($bashum_repo).  In order to pass validation,
 	the bashum file must have the proper strucutre as described by
 	its project.sh file and all the dependencies must be satisfied.
 
@@ -90,8 +89,24 @@ install() {
 	bashum_file_validate "$bashum_file"
 	echo "Done."
 
+	local package_home=$(package_get_home "$name")
+	if [[ -d $package_home ]]
+	then
+		echo -n "Removing old executables. "
+		package_remove_executables "$name"
+		echo "Done."
+
+		echo -n "Removing old package. "
+		if ! rm -r $package_home 
+		then
+			error "Error removing old package: $package_home"
+			exit 1
+		fi
+		echo "Done."
+	fi
+
 	echo -n "Unpacking bashum file. "
-	tar -xf "$bashum_file" -C $bashums_home
+	tar -xf "$bashum_file" -C $bashum_repo/packages 
 	echo "Done."
 
 	echo -n "Generating executables. " 

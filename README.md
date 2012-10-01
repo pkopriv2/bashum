@@ -61,6 +61,4 @@ Example:
 
 For the most part, bashum tries to be transparent to the current environment.  Things should just work.  However,
 a custom "require" function is available _all_ bashum projects and libraries.  Within the project itself, the files
-are referenced 
-
-
+are referenced relative to the _root_ of the project.  When referencing other projects, reference them globally.

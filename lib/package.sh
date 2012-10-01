@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+export bashum_repo=${bashum_repo:-$bashum_home/repo}
+
 require 'lib/error.sh'
 require 'lib/info.sh'
 require 'lib/fail.sh'
@@ -10,7 +12,7 @@ package_get_home() {
 		fail 'Must provide a project name.'
 	fi
 
-	echo "$bashums_home/$1"
+	echo "$bashum_repo/packages/$1"
 }
 
 package_get_executables() {
@@ -59,7 +61,7 @@ package_generate_executables() {
 		chmod a+x $executable
 
 		# determine where we're going to put the executable
-		local out=$bashum_bin_dir/$base_name
+		local out=$bashum_repo/bin/$base_name
 		if [[ -f $out ]]
 		then
 			rm $out
@@ -69,16 +71,16 @@ package_generate_executables() {
 		cat - > $out <<-eof
 			#! /usr/bin/env bash
 			export bashum_home=\${bashum_home:-\$HOME/.bashum}
-			export bashums_home=\${bashums_home:-\$bashum_home/bashums}
+			export bashum_repo=\${bashum_repo:-\$bashum_home/repo/packages}
 
 			# source our standard 'require' funciton.
 			source \$bashum_home/lib/require.sh
 
-			# update the bashums path to include the /lib folder of this bashum
-			export bashums_path=\$bashums_home/$name:\$bashums_path
+			# update the bashum path to include this package
+			export bashum_path=\$bashum_repo/packages/$name:\$bashum_path
 
 			# go ahead and execute the original executable
-			source \$bashums_home/$name/bin/$base_name "\$@"
+			source \$bashum_repo/packages/$name/bin/$base_name "\$@"
 		eof
 
 		# make it executable. bam!
@@ -95,11 +97,13 @@ package_remove_executables() {
 	local name="$1"
 	for executable in $(package_get_executables "$name" ) 
 	do
+		echo $executable
+
 		# grab the executable package_name 
 		local base_name=$(basename $executable) 
 
 		# derive where the bashum wrapper *should* be.
-		local wrapper=$bashum_bin_dir/$base_name
+		local wrapper=$bashum_repo/bin/$base_name
 
 		# can't do much if there is not a file.
 		if [[ ! -f $wrapper ]]
@@ -110,14 +114,14 @@ package_remove_executables() {
 		# see if this is the *right* executable.  if there are conflicting
 		# executables from separate packages, this should prevent us
 		# from deleting the wrong one.
-		if ! cat $wrapper | grep -q "source \$bashums_home/$name/bin/$base_name" 
+		if ! cat $wrapper | grep -q "source \$bashum_repo/packages/$name/bin/$base_name" 
 		then
 			continue		
 		fi
 
 		if ! rm $wrapper 
 		then
-			error "Error deleting file [$wrapper]"
+			error "Error deleting executable [$wrapper]"
 			exit 1 
 		fi
 	done
