@@ -45,7 +45,7 @@ info "Packaging version: $version"
 
 mkdir -p target
 
-out=$rr_home/target/bashum-$version.tar
+out=target/bashum-$version.tar
 if [[ -f $out ]] 
 then
 	rm -f $out

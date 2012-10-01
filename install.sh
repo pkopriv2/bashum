@@ -66,7 +66,7 @@ then
 	exit 1
 fi 
 
-env_files=( "~/.bashrc" ".bash_profile" "~/.zshrc" ) 
+env_files=( "~/.bashrc" "~/.bash_profile" "~/.zshrc" ) 
 for file in "${env_files[@]}"
 do
 	eval "file=$file" # expand the path correctly
