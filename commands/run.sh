@@ -12,7 +12,7 @@ require 'lib/project_file.sh'
 require 'lib/package.sh'
 
 run_usage() {
-	echo "$bashum_cmd run [project] [options]"
+	echo "$bashum_cmd run <command> [options]"
 }
 
 run_help() {
@@ -24,8 +24,9 @@ run_help() {
 
 	bold 'DESCRIPTION'
 	printf '%s' '
-	Runs one of the executable files contained in project.  Sets up 
-	the environment as if the project was assembled and installed.
+	Runs one of the executable files (<command>) contained in project.  Sets up 
+	the environment as if the project was assembled and installed. This is
+	intended for testing unreleased bashum projects.
 
 '
 
