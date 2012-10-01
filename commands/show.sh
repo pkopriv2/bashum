@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_bin_dir=${bashum_bin_dir:-$bashum_home/bin}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 require 'lib/error.sh'

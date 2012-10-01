@@ -1,8 +1,8 @@
 # /usr/bin/env bash
 
-export bashum_home=${bashum_home:-"$HOME/.bashum"}
-export bashum_repo=${bashum_repo:-$bashum_home/repo}
-export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
+export bashum_home=${bashum_home:-$HOME/.bashum}
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
+export bashum_path=${bashum_path:-$bashum_home:$bashum_repo/packages}
 
 declare -A bashum_requires=()
 
@@ -15,7 +15,8 @@ require() {
 	fi
 
 	# can this be better?  we're not actually checking against the 'actual'
-	# script, but the script as 'required'.  
+	# script, but the script as 'required' which is most likely a relative
+	# script and can potentially conflict.
 	if [[ "${bashum_requires["$1"]}" == "1" ]]
 	then
 		return 0 

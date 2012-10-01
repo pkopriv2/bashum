@@ -1,6 +1,6 @@
 # See if bashum_home has been set. If not, assume the standard location. 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 # add the root bin dir to the path
 if ! echo $PATH | grep -q $bashum_home/bin

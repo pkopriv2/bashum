@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 require 'lib/error.sh'
 require 'lib/info.sh'
@@ -71,7 +71,7 @@ package_generate_executables() {
 		cat - > $out <<-eof
 			#! /usr/bin/env bash
 			export bashum_home=\${bashum_home:-\$HOME/.bashum}
-			export bashum_repo=\${bashum_repo:-\$bashum_home/repo/packages}
+			export bashum_repo=\${bashum_repo:-\$HOME/.bashum_repo}
 
 			# source our standard 'require' funciton.
 			source \$bashum_home/lib/require.sh
@@ -97,8 +97,6 @@ package_remove_executables() {
 	local name="$1"
 	for executable in $(package_get_executables "$name" ) 
 	do
-		echo $executable
-
 		# grab the executable package_name 
 		local base_name=$(basename $executable) 
 

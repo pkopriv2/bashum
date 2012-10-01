@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 require 'lib/info.sh'
 require 'lib/project_file.sh'

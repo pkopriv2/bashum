@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_repo=${bashum_repo:-$bashum_home/repo}
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 require 'lib/error.sh'

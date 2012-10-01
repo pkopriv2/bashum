@@ -10,20 +10,20 @@ require 'lib/help.sh'
 require 'lib/project_file.sh'
 require 'lib/package.sh'
 
-uninstall_usage() {
-	echo "$bashum_cmd uninstall <package> [options]"
+remove_usage() {
+	echo "$bashum_cmd remove <package> [options]"
 }
 
-uninstall_help() {
+remove_help() {
 	bold 'USAGE'
 	echo 
-	printf "\t"; uninstall_usage
+	printf "\t"; remove_usage
 	echo
 
 
 	bold 'DESCRIPTION'
 	printf '%s' '
-	Uninstalls the specified bashum package from the local repo.
+	Removes the specified bashum package from the local repo.
 
 	This may require resourcing the environment if the specfied
 	package contained 'sourced' environment files.
@@ -37,10 +37,10 @@ uninstall_help() {
 '
 }
 
-uninstall() {
+remove() {
 	if help? "$@" 
 	then
-		uninstall_help "$@"
+		remove_help "$@"
 		exit $?
 	fi
 
@@ -49,7 +49,7 @@ uninstall() {
 		error "Must provide a package name."
 		echo 
 
-		echo -n 'USAGE: '; uninstall_usage 
+		echo -n 'USAGE: '; remove_usage 
 		exit 1
 	fi
 
@@ -60,7 +60,7 @@ uninstall() {
 		exit 1
 	fi
 
-	info "Uninstalling: $1"
+	info "Removing package: $1"
 
 	read -p "Are you sure? (y|n): " answer
 	if [[ "$answer" != "y" ]]
@@ -76,6 +76,6 @@ uninstall() {
 		exit 1
 	fi
 
-	info "Successfully uninstalled: $1"
+	info "Successfully removed: $1"
 	echo
 }
