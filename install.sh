@@ -62,7 +62,7 @@ fi
 info "Installing bashum."
 if ! tar -xf $bashum_file_tmp -C ~
 then
-	error "Error unpackaging tmp file [$bashum_tmp_file]"
+	error "Error unpackaging tmp file [$bashum_file_tmp]"
 	exit 1
 fi 
 
