@@ -76,6 +76,9 @@ run() {
 	export bashum_path=$cwd:$bashum_path
 
 	(
+		set +o errexit
+		set +o errtrace
+
 		if [[ -d env ]]
 		then
 			for file in $(ls env/*.sh)
