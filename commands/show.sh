@@ -101,7 +101,7 @@ show() {
 
 	# print the project file.
 	project_file_print "$project_file"
-
+	echo 
 
 	# print the executables
 	if (( ${#executables[@]} > 0 ))
@@ -122,7 +122,7 @@ show() {
 		declare local file
 		for file in "${libs[@]}" 
 		do
-			echo "    - $(basename $file)"
+			echo "    - lib/$(basename $file)"
 		done
 		echo 
 	fi

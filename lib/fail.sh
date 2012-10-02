@@ -2,14 +2,14 @@
 
 # Cause the calling script to fail by printing the
 # given message along with the current stack trace
-# to standard out and exit with the specified console_error 
+# to standard out and exit with the specified error 
 # status.
 #
 # $1 - The message to print
 # $2 - The exit code.
 #
 fail() {
-	echo "An console_error occurred: $1" 1>&2
+	echo "An error occurred: $1" 1>&2
 
 	local frame=0
 	while true 
@@ -19,7 +19,7 @@ fail() {
 			break
 		fi
 
-		let frame=frame+1 # (( frame++ )) will trigger an console_error if errexit is set.
+		let frame=frame+1 # (( frame++ )) will trigger an error if errexit is set.
 	done
 
 	exit ${2:-1}
