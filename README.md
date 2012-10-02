@@ -15,7 +15,7 @@ support for building, installing and managing .bashums
 
 # Dependencies
 
-* Bash:4.x 
+## Bash:4.x 
 	
 OSX: 
 	
@@ -30,7 +30,7 @@ Windows:
 	http://www.cygwin.com/ ( or just get smart and get Linux... )
 
 
-* GNU Core Utils
+## GNU Core Utils
 
 OSX: 
 	
