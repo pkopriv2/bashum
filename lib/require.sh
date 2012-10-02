@@ -55,3 +55,22 @@ require() {
 	caller 0 1>&2
 	exit 1
 }
+
+require_bashum() {
+	if [[ -z $1 ]]
+	then
+		echo "Must provide a bashum to load." 1>&2 
+		caller 0 1>&2
+		exit 1
+	fi
+	
+	local bashum_home="$bashum_repo/packages/$1"
+	if [[ ! -d $bashum_home ]]
+	then
+		echo "Unable to locate bashum: $1" 1>&2 
+		caller 0 1>&2
+		exit 1
+	fi
+
+	export bashum_path=$bashum_home:$bashum_path
+}
