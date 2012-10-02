@@ -13,6 +13,39 @@ support for building, installing and managing .bashums
 * *remove*    - Uninstalls a bashum file.
 * *run*    	  - Runs an executable under the current bashum project.  
 
+# Dependencies
+
+* Bash:4.x 
+	
+OSX: 
+	
+	brew install bash
+
+Linux:
+	
+	aptitude install bash
+
+Windows:
+
+	http://www.cygwin.com/ ( or just get smart and get Linux... )
+
+
+* GNU Core Utils
+
+OSX: 
+	
+	brew install coreutils
+
+Linux:
+	
+	aptitude install coreutils
+
+Windows:
+
+	http://www.cygwin.com/ 
+	
+
+
 # Installation
 
 * Install the current version.
