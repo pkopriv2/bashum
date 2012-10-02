@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
-require 'lib/error.sh'
-require 'lib/info.sh'
+require 'lib/console.sh'
 require 'lib/fail.sh'
 
 declare bashum_project_file_loaded

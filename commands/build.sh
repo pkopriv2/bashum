@@ -4,8 +4,8 @@ export bashum_project_file=${bashum_project_file:-"project.sh"}
 export bashum_project_files=${bashum_project_files:-"bin:lib:env:project.sh"}
 
 require 'lib/project_file.sh'
+require 'lib/console.sh'
 require 'lib/help.sh'
-require 'lib/font.sh'
 
 build_usage() {
 	echo "$bashum_cmd build [options]"

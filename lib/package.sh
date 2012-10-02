@@ -2,8 +2,7 @@
 
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
-require 'lib/error.sh'
-require 'lib/info.sh'
+require 'lib/console.sh'
 require 'lib/fail.sh'
 
 package_get_home() {

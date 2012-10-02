@@ -1,6 +1,6 @@
 #! /bin/bash
 
-info() {
+console_info() {
 	if ! tput setaf &> /dev/null
 	then
 		echo -e "$1"
@@ -9,7 +9,7 @@ info() {
 	fi
 }
 
-error() {
+console_error() {
 	if ! tput setaf &> /dev/null
 	then
 		echo -e "$1" 1>&2
@@ -21,7 +21,7 @@ error() {
 
 if [[ ! -f project.txt ]]
 then
-	error "Must be in the root of the project directory."
+	console_error "Must be in the root of the project directory."
 	exit 1
 fi
 
@@ -35,13 +35,13 @@ do
 			version="latest"
 			;;
 		*)
-			error "That option is not allowed" 
+			console_error "That option is not allowed" 
 			;;
 	esac
 	shift
 done
 
-info "Packaging version: $version" 
+console_info "Packaging version: $version" 
 
 mkdir -p target
 

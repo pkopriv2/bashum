@@ -3,10 +3,8 @@
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
-require 'lib/error.sh'
+require 'lib/console.sh'
 require 'lib/string.sh'
-require 'lib/info.sh'
-require 'lib/font.sh'
 require 'lib/fail.sh'
 require 'lib/help.sh'
 require 'lib/package.sh'

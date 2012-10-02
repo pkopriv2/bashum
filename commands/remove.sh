@@ -2,9 +2,7 @@
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
 
-require 'lib/error.sh'
-require 'lib/font.sh'
-require 'lib/info.sh'
+require 'lib/console.sh'
 require 'lib/fail.sh'
 require 'lib/help.sh'
 require 'lib/project_file.sh'

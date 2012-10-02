@@ -5,8 +5,7 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
 export bashum_project_file=${bashum_project_file:-"project.sh"}
 
-require 'lib/error.sh'
-require 'lib/font.sh'
+require 'lib/console.sh'
 require 'lib/help.sh'
 require 'lib/project_file.sh'
 require 'lib/package.sh'

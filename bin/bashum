@@ -8,9 +8,10 @@ export bashum_version="1.0.0"
 
 source $bashum_home/lib/require.sh
 
-require 'lib/error.sh'
-require 'lib/info.sh'
-require 'lib/font.sh'
+set -o errexit 
+set -o errtrace 
+
+require 'lib/console.sh'
 
 # ensure all the required directories are there.
 [[ -d $bashum_repo ]]          || mkdir -p $bashum_repo

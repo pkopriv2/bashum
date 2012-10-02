@@ -3,10 +3,9 @@
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
-require 'lib/info.sh'
+require 'lib/console.sh'
 require 'lib/project_file.sh'
 require 'lib/help.sh'
-require 'lib/font.sh'
 
 list_usage() {
 	echo "$bashum_cmd list [options]"

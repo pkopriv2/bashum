@@ -5,13 +5,13 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 # add the root bin dir to the path
 if ! echo $PATH | grep -q $bashum_home/bin
 then
-	PATH=$PATH:$bashum_home/bin
+	PATH=$bashum_home/bin:$PATH
 fi
 
 # add the repo bin dir to the path 
 if ! echo $PATH | grep -q $bashum_repo/bin
 then
-	PATH=$PATH:$bashum_repo/bin
+	PATH=$bashum_repo/bin:$PATH
 fi
 
 # source all the environment files in all the packages.

@@ -1,39 +1,6 @@
 #! /usr/bin/env bash
 
-require 'lib/error.sh'
-require 'lib/info.sh'
-require 'lib/fail.sh'
-
-# download_package <url> <target> 
-bashum_file_download() {
-	if (( $# < 2 ))
-	then
-		fail "Must provide both a url and target"
-	fi
-
-	info "Downloading bashum file: $1 to: $2"
-
-	if command -v curl &> /dev/null
-	then
-		if ! curl -L $1 > $2
-		then
-			error "Error downloading: $1.  Either cannot download or cannot write to file: $2"
-			exit 1
-		fi
-
-	elif command -v wget &> /dev/null
-	then
-		if ! wget -q -O $2 $1
-		then
-			error "Error downloading: $1.  Either cannot download or cannot write to file: $2"
-			exit 1
-		fi
-
-	else
-		error "This installation requires either curl or wget."
-		exit 1
-	fi
-}
+require 'lib/console.sh'
 
 bashum_file_extract_project_file() {
 	# locate the required <name>/project_file.sh

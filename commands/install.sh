@@ -4,15 +4,14 @@ export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
-require 'lib/error.sh'
+require 'lib/console.sh'
 require 'lib/string.sh'
-require 'lib/info.sh'
-require 'lib/font.sh'
 require 'lib/fail.sh'
 require 'lib/help.sh'
 require 'lib/package.sh'
 require 'lib/project_file.sh'
 require 'lib/bashum_file.sh'
+require 'lib/download.sh'
 
 install_usage() {
 	echo "$bashum_cmd install <package> [options]"
@@ -69,7 +68,7 @@ install() {
 	if ! is_local? "$bashum_file" 
 	then
 		local bashum_file=$bashum_tmp_dir/$(str_random) 
-		bashum_file_download "$1" "$bashum_file"
+		download "$1" "$bashum_file"
 	fi
 
 	if [[ ! -f "$bashum_file" ]]
