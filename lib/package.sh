@@ -44,6 +44,28 @@ package_get_executables() {
 	done
 }
 
+package_get_libs() {
+	if [[ -z $1 ]]
+	then
+		fail 'Must provide a project name.'
+	fi
+
+	local package_home=$(package_get_home "$1")
+	if [[ ! -d $package_home ]] 
+	then
+		error "Package [$1] is not installed."
+		exit 1
+	fi
+
+	local lib_dir=$package_home/lib
+	if [[ ! -d $lib_dir ]] 
+	then
+		return 0 
+	fi
+
+	find $lib_dir -name '*.sh' 
+}
+
 package_generate_executables() {
 	if [[ -z $1 ]]
 	then

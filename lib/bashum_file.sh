@@ -22,6 +22,40 @@ bashum_file_extract_project_file() {
 	echo "$bashum_tmp_dir/$project_file" 
 }
 
+bashum_file_get_executables() {
+	if [[ -z $1 ]]
+	then
+		error 'Must provide a bashum file'
+		exit 1
+	fi
+
+	local bashum_file=$1
+	if [[ ! -f $bashum_file ]] 
+	then
+		error "That bashum file [$bashum_file] doesn't exist"
+		exit 1
+	fi
+	
+	tar -tf $bashum_file | grep '^[^/]*/bin/[^/]\+$' 
+}
+
+bashum_file_get_libs() {
+	if [[ -z $1 ]]
+	then
+		error 'Must provide a bashum file'
+		exit 1
+	fi
+
+	local bashum_file=$1
+	if [[ ! -f "$bashum_file" ]] 
+	then
+		error "That bashum file [$bashum_file] doesn't exist"
+		exit 1
+	fi
+	
+	tar -tf $bashum_file | grep '^[^/]*/lib/.' 
+}
+
 bashum_file_validate() {
 	# package_info
 	local project_file=$(bashum_file_extract_project_file $1) 

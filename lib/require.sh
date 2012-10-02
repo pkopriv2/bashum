@@ -29,6 +29,16 @@ require() {
 	for path in $bashum_path 
 	do
 		local script=$path/$1
+
+		# if a directory was required, put it on the path.
+		if [[ -d $script ]]
+		then
+			bashum_path=$script:$bashum_path
+			IFS=$_IFS
+			return 0
+		fi
+
+		# if the script doesn't exist on this path, just continue
 		if [[ ! -f $script ]]
 		then
 			continue

@@ -4,6 +4,7 @@ export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 require 'lib/console.sh'
+require 'lib/download.sh'
 require 'lib/string.sh'
 require 'lib/fail.sh'
 require 'lib/help.sh'
@@ -66,26 +67,31 @@ show() {
 
 	local arg=$1
 
+	# see if the input is a url
+	if echo $arg | grep -q '^http' 
+	then
+		local bashum_file=$bashum_tmp_dir/$(str_random)
+		download "$arg" "$bashum_file"
+		local arg=$bashum_file
+		echo 
+	fi
+
 	# see if the input is a local file (ie a .bashum)
 	if [[ -f "$arg" ]]
 	then
-		local project_file=$(bashum_file_extract_project_file $arg)
-		project_file_print "$project_file"
-		exit 0
-	fi
+		local project_file=$(bashum_file_extract_project_file "$arg")
+		local executables=( $(bashum_file_get_executables "$arg") )
+		local libs=( $(bashum_file_get_libs "$arg") )
 
-	# see if the input is a package name
-	local package_home=$(package_get_home "$arg")
-	if [[ -d $package_home ]] 
+	# see if the input is an installed package
+	elif [[ -d "$bashum_repo/packages/$arg" ]]
 	then
-		local project_file=$package_home/project.sh
-		project_file_print "$project_file"
-		exit 0
-	fi
-
-	# okay, see if it's a url
-	if ! echo $arg | grep -q '^http' 
-	then
+		local project_file=$bashum_repo/packages/"$arg"/project.sh
+		local executables=( $(package_get_executables "$arg") )
+		local libs=( $(package_get_libs "$arg") )
+	
+	# welp, nothing we can do. 
+	else
 		error "Invalid input.  Must be either a .bashum file, a package name, or the remote url of a bashum file. "
 		echo 
 
@@ -93,24 +99,31 @@ show() {
 		exit 1
 	fi
 
-	local bashum_file=$bashum_tmp_dir/$(str_random)
-	bashum_file_download "$arg" "$bashum_file" &> /dev/null 
-	
-	local project_file=$(bashum_file_extract_project_file "$bashum_file")
+	# print the project file.
 	project_file_print "$project_file"
-}
 
-is_local?() {
-	if [[ -f "$1" ]]
+
+	# print the executables
+	if (( ${#executables[@]} > 0 ))
 	then
-		return 0
+		info "Executables: " 
+		declare local file
+		for file in "${executables[@]}" 
+		do
+			echo "    - $(basename $file)"
+		done
+		echo 
 	fi
 
-	if echo $1 | grep -q '^http'
+	# print the library files
+	if (( ${#libs[@]} > 0 ))
 	then
-		return 1
+		info "Libraries: " 
+		declare local file
+		for file in "${libs[@]}" 
+		do
+			echo "    - $(basename $file)"
+		done
+		echo 
 	fi
-
-	error "Package [$1] is not a local package and is not a url."
-	exit 1
 }
