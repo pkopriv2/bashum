@@ -122,7 +122,7 @@ show() {
 		declare local file
 		for file in "${libs[@]}" 
 		do
-			echo "    - lib/$(basename $file)"
+			echo "    - ${file##*$name}"
 		done
 		echo 
 	fi
