@@ -34,6 +34,7 @@ require() {
 		if [[ -d $script ]]
 		then
 			bashum_path=$script:$bashum_path
+			bashum_requires["$1"]="1" 
 			IFS=$_IFS
 			return 0
 		fi
@@ -63,6 +64,12 @@ require_bashum() {
 		caller 0 1>&2
 		exit 1
 	fi
+
+	# same concern as above.
+	if [[ "${bashum_requires["$1"]}" == "1" ]]
+	then
+		return 0 
+	fi
 	
 	local bashum_home="$bashum_repo/packages/$1"
 	if [[ ! -d $bashum_home ]]
@@ -73,4 +80,5 @@ require_bashum() {
 	fi
 
 	export bashum_path=$bashum_home:$bashum_path
+	bashum_requires["$1"]="1" 
 }

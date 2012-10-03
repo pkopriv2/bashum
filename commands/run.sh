@@ -74,6 +74,7 @@ run() {
 	local cwd=$(pwd)
 	export PATH=$cwd/bin:$PATH
 	export bashum_path=$cwd:$bashum_path
+	export project_root=$cwd
 
 	(
 		if [[ -d env ]]

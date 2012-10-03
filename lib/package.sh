@@ -93,15 +93,16 @@ package_generate_executables() {
 			#! /usr/bin/env bash
 			export bashum_home=\${bashum_home:-\$HOME/.bashum}
 			export bashum_repo=\${bashum_repo:-\$HOME/.bashum_repo}
+			export project_root=\$bashum_repo/packages/$name
 
 			# source our standard 'require' funciton.
 			source \$bashum_home/lib/require.sh
 
 			# update the bashum path to include this package
-			export bashum_path=\$bashum_repo/packages/$name:\$bashum_path
+			export bashum_path=\$project_root:\$bashum_path
 
 			# go ahead and execute the original executable
-			source \$bashum_repo/packages/$name/bin/$base_name "\$@"
+			source \$project_root/bin/$base_name "\$@"
 		eof
 
 		# make it executable. bam!
