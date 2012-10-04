@@ -131,7 +131,7 @@ build() {
 	# add in custom files.
 	for glob in "${file_globs[@]}"
 	do
-		for file in $(ls $glob)
+		for file in $glob
 		do
 			if [[ ! -f $file && ! -d $file ]]
 			then
