@@ -4,8 +4,15 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 require 'lib/console.sh'
 require 'lib/fail.sh'
+require 'lib/project_file.sh'
 
+# usage: package_get_home <name>
 package_get_home() {
+	if (( $# == 0 ))
+	then
+		fail 'Usage: package_get_home <name>'
+	fi
+
 	if [[ -z $1 ]]
 	then
 		fail 'Must provide a project name.'
@@ -14,6 +21,139 @@ package_get_home() {
 	echo "$bashum_repo/packages/$1"
 }
 
+# usage: package_is_installed <name> [<version>]
+package_is_installed() {
+	if (( $# < 1 )) || (( $# > 2 ))
+	then
+		fail 'Usage: package_is_installed <name>'
+	fi
+	
+	local package_home=$(package_get_home $1)
+	if [[ ! -d $package_home ]] 
+	then
+		return 1
+	fi
+
+	# no version was given
+	if (( $# == 1 )) 
+	then
+		return 0
+	fi
+
+	# determine if an acceptable version is installed.
+	local project_file=$package_home/project.sh
+	if [[ ! -f $project_file ]]
+	then
+		fail "Package [$1] is missing a project file."
+	fi
+
+	project_file_api
+	local version=""
+	version() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: version <version>"
+		fi
+
+		version=$1 
+	}
+
+	source $project_file 
+	project_file_api_unset
+
+	# if the version of this project is greater than what was passed in,
+	# then return true. 
+	[[ "$version" > "$2" ]]; return $?
+}
+
+# usage: package_get_dependencies <file|name>
+package_get_dependencies() {
+	if (( $# != 0 ))
+	then
+		fail 'usage: package_get_dependencies <file|name>'
+	fi
+
+	local package_home=$(package_get_home $1)
+	if [[ ! -d $package_home ]]
+	then
+		fail "Package [$1] is not installed."
+	fi
+	
+	local project_file=$package_home/project.sh
+	project_file_get_dependencies $project_file
+}
+
+# usage: package_get_dependers <name>
+package_get_dependers() {
+	if (( $# != 0 ))
+	then
+		fail 'usage: package_get_dependencies <file|name>'
+	fi
+
+	local package_home=$(package_get_home $1)
+	if [[ ! -d $package_home ]]
+	then
+		fail "Package [$1] is not installed."
+	fi
+	
+	local project_file=$package_home/project.sh
+	if [[ ! -f $project_file ]]
+	then
+		fail "Package [$1] is missing a project file."
+	fi
+
+	local project_name=$(
+		project_file_api
+		name() {
+			if (( $# != 1 ))
+			then
+				fail "Usage: name <name>"
+			fi
+
+			echo $1
+		}
+
+		source $project_file
+		project_file_api_unset
+	)
+
+	(
+		# iterate over *all* other projects looking for those 
+		# who depend on this. 
+		declare local cur_project_file
+		for cur_project_file in $(ls $bashum_repo/packages/*/project.sh 2>/dev/null)
+		do
+			project_file_api
+
+			local cur_project_name=""
+			name() {
+				if (( $# != 1 ))  
+				then
+					fail "Usage: name <name>"
+				fi
+
+				cur_project_name=$1
+			}
+
+			depends() {
+				if (( $# < 1 )) || (( $# > 2 )) 
+				then
+					fail "Usage: depends <project> [<version>]"
+				fi
+
+				if [[ "$1" == "$project_name" ]]
+				then
+					echo $cur_project_name
+				fi
+			}
+
+			source $project_file
+			project_file_api_unset
+		done
+	) || exit 1 
+}
+
+# usage: package_get_executables <name>
 package_get_executables() {
 	if [[ -z $1 ]]
 	then
@@ -146,3 +286,4 @@ package_remove_executables() {
 		fi
 	done
 }
+

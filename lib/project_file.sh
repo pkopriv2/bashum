@@ -5,6 +5,78 @@ require 'lib/fail.sh'
 
 declare bashum_project_file_loaded
 
+project_file_api() {
+	name() {
+		:
+	}
+
+	version() {
+		:
+	}
+
+	author() {
+		:
+	}
+
+	email() {
+		:
+	}
+
+	description() {
+		:
+	}
+
+	file() {
+		:
+	}
+
+	depends() {
+		:
+	}
+}
+
+project_file_api_unset() {
+	unset -f name
+	unset -f version
+	unset -f author 
+	unset -f email 
+	unset -f description
+	unset -f file
+	unset -f depends
+}
+
+project_file_get_dependencies() {
+	if (( $# != 0 ))
+	then
+		fail 'usage: project_file_get_dependencies <file>'
+	fi
+
+	local project_file=$1
+	if [[ ! -f $project_file ]]
+	then
+		fail "Input [$1] is not a project file."
+	fi
+
+	project_file_api
+	depends() {
+		if (( $# < 1 )) || (( $# > 2 )) 
+		then
+			fail "Usage: depends <project> [<version>]"
+		fi
+
+		if (( $# == 1 ))
+		then
+			echo $1
+			return 
+		fi
+		
+		echo $1:$2
+	}
+
+	source $project_file
+	project_file_api_unset
+}
+
 # loads the given project file into the current shell
 # environment.
 project_file_load() {
@@ -83,8 +155,6 @@ project_file_load() {
 	unset -f depends
 }
 
-#
-#
 project_file_print() {
 	if [[ -z "$1" ]]
 	then
@@ -193,3 +263,4 @@ project_file_validate_dependencies() {
 		) || exit 1
 	done
 }
+
