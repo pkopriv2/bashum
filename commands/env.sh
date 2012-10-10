@@ -29,13 +29,24 @@ env_help() {
 }
 
 env() {
+	if help? $@
+	then
+		env_help $@
+		exit $?
+	fi
+
 	info "Environment entries:"
 	echo 
 
-	local entries=( bashum_home bashum_repo bashum_path bashum_project_files )
+	local entries=( \
+		bashum_home \
+		bashum_repo \
+		bashum_path \
+		bashum_project_files \
+	)
+
 	for entry in "${entries[@]}"
 	do
 		printf '\t%s: %s\n' "$entry" "$(eval "echo \$$entry")"
 	done
-
 }

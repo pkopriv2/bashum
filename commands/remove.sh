@@ -54,7 +54,7 @@ remove() {
 	local package_home=$(package_get_home "$1")
 	if [[ ! -d "$package_home" ]]
 	then
-		error "That package [$package_home] is not installed"
+		error "That package [$1] is not installed"
 		exit 1
 	fi
 
@@ -65,6 +65,13 @@ remove() {
 	then
 		echo "Aborting."
 		exit 0
+	fi
+
+	local dependers=( $(package_get_dependers "$1") )
+	if (( ${#dependers[@]} > 0 ))
+	then
+		error "Cannot remove package [$1]. It is depended upon by: ( ${dependers[@]} )"
+		exit 1
 	fi
 
 	package_remove_executables "$1"

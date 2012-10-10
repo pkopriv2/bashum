@@ -76,12 +76,11 @@ depends "other" "1.0.0"
 }
 
 build() {
-	case "$1" in
-		-h|--help|help)
-			build_help "$@"
-			exit $?
-			;;
-	esac
+	if help? "$@"
+	then
+		build_help "$@"
+		exit $?
+	fi
 
 	# determine if we're in an actual bashum-style project.
 	if [[ ! -f $bashum_project_file ]]

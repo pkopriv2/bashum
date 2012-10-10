@@ -82,7 +82,7 @@ install() {
 
 	local project_file=$(bashum_file_extract_project_file "$bashum_file")
 	project_file_print "$project_file"
-	echo 
+	echo
 
 	echo -n "Validating bashum file. "
 	bashum_file_validate "$bashum_file"

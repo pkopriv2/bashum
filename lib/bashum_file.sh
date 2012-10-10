@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 require 'lib/console.sh'
+require 'lib/package.sh'
 
 bashum_file_extract_project_file() {
 	# locate the required <name>/project_file.sh
@@ -69,11 +70,22 @@ bashum_file_validate() {
 	do
 		if ! echo "$file" | grep -q "^$name"
 		then
-			error "That package [$1] is corrupted.  Unexpected file: $file"
+			error "That bashum [$1] is corrupted.  Unexpected file: $file"
 			exit 1
 		fi
 	done
 
-	# validate the dependencies.
-	project_file_validate_dependencies $project_file
+	# validate the dependencies
+	declare local dependency
+	for dependency in "${dependencies[@]}"
+	do 
+		local dep_name=${dependency%%:*}
+		local dep_version=${dependency##*:}
+
+		if ! package_is_installed $dep_name $dep_version
+		then
+			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
+			exit 1
+		fi
+	done
 }

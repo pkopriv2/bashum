@@ -63,31 +63,15 @@ package_is_installed() {
 
 	# if the version of this project is greater than what was passed in,
 	# then return true. 
-	[[ "$version" > "$2" ]]; return $?
+	[[ "$version" > "$2" ]] || [[ "$version" == "$2" ]]; return $?
 }
 
-# usage: package_get_dependencies <file|name>
-package_get_dependencies() {
-	if (( $# != 0 ))
-	then
-		fail 'usage: package_get_dependencies <file|name>'
-	fi
-
-	local package_home=$(package_get_home $1)
-	if [[ ! -d $package_home ]]
-	then
-		fail "Package [$1] is not installed."
-	fi
-	
-	local project_file=$package_home/project.sh
-	project_file_get_dependencies $project_file
-}
 
 # usage: package_get_dependers <name>
 package_get_dependers() {
-	if (( $# != 0 ))
+	if (( $# != 1 ))
 	then
-		fail 'usage: package_get_dependencies <file|name>'
+		fail 'usage: package_get_dependers <name>'
 	fi
 
 	local package_home=$(package_get_home $1)
@@ -102,20 +86,7 @@ package_get_dependers() {
 		fail "Package [$1] is missing a project file."
 	fi
 
-	local project_name=$(
-		project_file_api
-		name() {
-			if (( $# != 1 ))
-			then
-				fail "Usage: name <name>"
-			fi
-
-			echo $1
-		}
-
-		source $project_file
-		project_file_api_unset
-	)
+	project_file_load $project_file
 
 	(
 		# iterate over *all* other projects looking for those 
@@ -135,19 +106,32 @@ package_get_dependers() {
 				cur_project_name=$1
 			}
 
+			local cur_project_dependencies=()
 			depends() {
 				if (( $# < 1 )) || (( $# > 2 )) 
 				then
 					fail "Usage: depends <project> [<version>]"
 				fi
 
-				if [[ "$1" == "$project_name" ]]
+				cur_project_dependencies+=( $1 )
+			}
+
+			source $cur_project_file
+
+			if [[ -z $name ]]
+			then
+				fail "Project file [$cur_project_file] must include a name." 
+			fi
+
+			declare local cur_project_dependency
+			for cur_project_dependency in "${cur_project_dependencies[@]}"
+			do
+				if [[ $cur_project_dependency == $name ]]
 				then
 					echo $cur_project_name
 				fi
-			}
+			done
 
-			source $project_file
 			project_file_api_unset
 		done
 	) || exit 1 
@@ -175,12 +159,10 @@ package_get_executables() {
 
 	for executable in $(ls $bin_dir/*) 
 	do
-		if [[ ! -f $executable ]]
+		if [[ -f $executable ]]
 		then
-			continue
+			echo $executable
 		fi
-
-		echo $executable
 	done
 }
 
@@ -286,4 +268,3 @@ package_remove_executables() {
 		fi
 	done
 }
-
