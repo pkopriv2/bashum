@@ -1,7 +1,6 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
-
 source $bashum_home/lib/require.sh
 
 require "lib/console.sh"
