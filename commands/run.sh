@@ -69,7 +69,20 @@ run() {
 		exit 1
 	fi
 
-	project_file_validate_dependencies $project_file
+	project_file_load $project_file
+
+	declare local dependency
+	for dependency in "${dependencies[@]}"
+	do 
+		local dep_name=${dependency%%:*}
+		local dep_version=${dependency##*:}
+
+		if ! package_is_installed $dep_name $dep_version
+		then
+			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
+			exit 1
+		fi
+	done
 
 	local cwd=$(pwd)
 	export PATH=$cwd/bin:$PATH
