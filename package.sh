@@ -55,5 +55,6 @@ griswold -o $out                     \
 		 -b .bashum                  \
 		  bin                        \
 		  lib                        \
+		  env                        \
 		  commands                   \
 		  env.sh                     \

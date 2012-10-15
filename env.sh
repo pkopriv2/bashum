@@ -14,6 +14,15 @@ then
 	PATH=$bashum_repo/bin:$PATH
 fi
 
+# source all the bashum environment files
+for file in $(ls $bashum_home/env/*.sh 2>/dev/null) 
+do
+	if [[ -f $file ]]
+	then
+		source $file 
+	fi
+done
+
 # source all the environment files in all the packages.
 for file in $(ls $bashum_repo/packages/*/env/*.sh 2>/dev/null) 
 do
