@@ -108,7 +108,44 @@ test() {
 		do
 			echo "Running tests for: $test_file" 
 
-			source $test_file 
+			(
+				source $test_file 
+
+				# find all the test functions
+				local tests=$( declare -F | grep 'test_.*' | sed 's|declare -f||' )
+				for fn in ${tests[@]}
+				do
+					if [[ $fn == "test_help" ]]
+					then
+						continue
+					fi
+
+					if [[ $fn == "test_usage" ]]
+					then
+						continue
+					fi
+
+					if declare -F before &> /dev/null
+					then
+						before || {
+							error "Error running before"
+							exit 1
+						}
+					fi
+
+					echo "Running test: $fn"
+					$fn || {
+						error "Error running test: $fn"
+						exit 1
+					}
+				done
+			) || {
+				error "Error running tests for file: $test_file"
+				exit 1
+			}
 		done
-	) || { error "Tests failed to execute."; exit 1; }
+	) || { 
+		error "Tests failed to execute."
+		exit 1
+	}
 }
