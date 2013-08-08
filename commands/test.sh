@@ -56,11 +56,11 @@ test() {
 		local test_files=()
 		while (( $# > 0 ))
 		do
-			test_files+=( $(find test/ -name "$1"_test.sh"" ) )
+			test_files+=( $(find test -name "$1"_test.sh"" ) )
 			shift 
 		done
 	else
-		local test_files=( $(find test/ -name '*_test.sh') )
+		local test_files=( $(find test -name '*_test.sh') )
 	fi
 
 	if (( ${#test_files[@]} == 0 ))
@@ -110,5 +110,5 @@ test() {
 
 			source $test_file 
 		done
-	)
+	) || { error "Tests failed to execute."; exit 1; }
 }

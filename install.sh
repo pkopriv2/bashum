@@ -34,7 +34,7 @@ then
 fi
 
 bashum_file_tmp=${bashum_file_tmp:-/tmp/bashum.tar}
-bashum_file_remote=${bashum_file_remote:-"https://github.com/downloads/pkopriv2/bashum/bashum-$version.tar"}
+bashum_file_remote=${bashum_file_remote:-"https://github.com/pkopriv2/bashum_repo/raw/master/bashum-$version.tar"}
 
 console_info "Attempting to download bashum file: $bashum_file_remote"
 if command -v curl &> /dev/null

@@ -6,12 +6,13 @@ support for building, installing and managing .bashums
 
 # Commands
 
-* *build*     - Assembles the bashum project in the current working directory.
-* *install*   - Installs a bashum to the local bashum repo.
-* *list*      - Lists the currently installed bashums.
-* *show*      - Shows a detailed view of a bashum pacage, a .bashum file or a remote file. 
-* *remove*    - Uninstalls a bashum file.
-* *run*    	  - Runs an executable under the current bashum project.  
+* *build*   - Assembles the bashum project in the current working directory.
+* *install* - Installs a bashum to the local bashum repo.
+* *list*    - Lists the currently installed bashums.
+* *show*    - Shows a detailed view of a bashum pacage, a .bashum file or a remote file.
+* *remove*  - Uninstalls a bashum file.
+* *run*     - Runs an executable under the current bashum project.
+* *test*    - Runs a subset of tests for the project.
 
 # Dependencies
 
@@ -19,7 +20,9 @@ support for building, installing and managing .bashums
 	
 OSX: 
 	
-	brew install bash
+	sudo brew install bash
+	sudo mv /usr/bin/bash /usr/bin/bash3
+	sudo ln -s /usr/local/bin/bash /usr/bin/bash
 
 Linux:
 	
@@ -34,7 +37,7 @@ Windows:
 
 OSX: 
 	
-	brew install coreutils
+	sudo brew install coreutils
 
 Linux:
 	
@@ -44,7 +47,22 @@ Windows:
 
 	http://www.cygwin.com/ 
 	
+## GNU Tar
 
+OSX: 
+	
+	sudo brew install gnu-tar
+	sudo mv /usr/bin/tar /usr/bin/tar-bsd
+	sudo ln -s /usr/local/bin/gtar /usr/bin/tar
+
+Linux:
+	
+	aptitude install tar
+
+Windows:
+
+	http://www.cygwin.com/ 
+	
 
 # Installation
 
