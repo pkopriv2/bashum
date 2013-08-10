@@ -21,7 +21,7 @@ support for building, installing and managing .bashums
 OSX: 
 	
 	sudo brew install bash
-	sudo mv /usr/bin/bash /usr/bin/bash3
+	sudo mv /bin/bash /bin/bash3
 	sudo ln -s /usr/local/bin/bash /usr/bin/bash
 
 Linux:

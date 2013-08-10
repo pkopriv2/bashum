@@ -13,6 +13,11 @@ require 'lib/project_file.sh'
 require 'lib/bashum_file.sh'
 require 'lib/download.sh'
 
+if ! command -v git &> /dev/null
+then
+	fail "git cannot be found."
+fi
+
 install_usage() {
 	echo "$bashum_cmd install <package> [options]"
 }
@@ -75,6 +80,8 @@ install() {
 	then
 		error "That package [$bashum_file] doesn't exist."
 		exit 1
+	else
+		git clone ... $bashum_repo
 	fi
 
 	info "Installing bashum file: $bashum_file"
