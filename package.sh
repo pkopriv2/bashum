@@ -43,18 +43,36 @@ done
 
 console_info "Packaging version: $version" 
 
-mkdir -p target
+# ensure that we have a clean staging directory
+staging_dir=target/.bashum
+if [[ -e $staging_dir ]]
+then
+	rm -rf $staging_dir
+fi
 
-out=target/bashum-$version.tar
+mkdir -p $staging_dir
+
+# copy the files into the staging directory
+files=( "bin" "lib" "env" "env.sh" "commands" )
+for file in ${files[@]}
+do
+	if ! cp -r $file $staging_dir
+	then
+		console_error "Error copying file [$file] to staging dir [$staging_dir]"
+		exit 1
+	fi
+done
+
+# create the output file
+out=bashum-$version.tar
 if [[ -f $out ]] 
 then
 	rm -f $out
 fi
 
-griswold -o $out                     \
-		 -b .bashum                  \
-		  bin                        \
-		  lib                        \
-		  env                        \
-		  commands                   \
-		  env.sh                     \
+builtin cd target
+if ! tar -cvf $out .bashum 
+then
+	console_error "Error building bashum tar"
+	exit 1
+fi

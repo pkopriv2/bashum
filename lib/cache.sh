@@ -1,88 +1,185 @@
 #! /usr/bin/env bash
 
-export bashum_cache_url=${bashum_cache_url:-"https://github.com/pkopriv2/bashum_repo.git"}
+
+export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
+export bashum_cache_home=${bashum_cache_home:-$bashum_repo/cache}
+export bashum_cache_urls=${bashum_cache_urls:-"https://github.com/pkopriv2/bashum_repo.git"}
 
 require 'lib/fail.sh'
 
-# usage: package_get_home <name>
-cache_get_home() {
-	echo "$bashum_repo/cache"
+# ensure that the cache home exists.
+[[ -d $bashum_cache_home ]] || mkdir -p $bashum_cache_home
+
+# usage: cache_repo_get_home <url>
+cache_repo_get_home() {
+	if (( $# != 1 )) 
+	then
+		fail "usage: cache_repo_get_home <url>"
+	fi
+
+	echo "$bashum_cache_home/$(basename $1)@$(basename $(dirname $1))"
 }
 
-cache_exists() {
-	[[ -d $(cache_get_home) ]]; return $?;
+# usage: cache_repo_is_installed <url>
+cache_repo_is_installed() {
+	if (( $# != 1 )) 
+	then
+		fail "usage: cache_repo_is_installed <url>"
+	fi
+
+	[[ -d "$(cache_repo_get_home $1)" ]]; return $?;
 }
 
-cache_validate() {
-	local cache_dir=$(cache_get_home)
+# usage: cache_repo_install <url>
+cache_repo_install() {
+	if (( $# != 1 )) 
+	then
+		fail "usage: cache_repo_install <url>"
+	fi
 
-	cache_exists && 
-		[[ -d $cache_dir/.git ]]
-}
+	if cache_repo_is_installed $1
+	then
+		fail "That repo [$1] has already been installed."
+	fi
 
-cache_delete() {
-	[[ -d $(cache_get_home) ]] && 
-		rm -rf $(cache_get_home)
-}
-
-cache_install() {
-	local parent_dir=$(dirname $(
-
+	local target_dir="$(cache_repo_get_home $1)"
 	( 
-		mkdir -p $(cache_get_home)
-		cd $(cache_get_home)
-		git clone $bashum_cache_url || 
-			fail "Failed to clone bashum cache repo: $bashum_cache_url"
+		git clone $1 $target_dir || 
+			fail "Failed to clone bashum cache repo [$1]"
 	) || exit 1
 }
 
-cache_sync() {
+# usage: cache_repo_sync <dir>
+cache_repo_sync() {
+	if (( $# != 1 )) 
+	then
+		fail "usage: cache_repo_sync <url>"
+	fi
+
+	if [[ ! -d $1 ]]
+	then
+		fail "Repo [$1] does not exist"
+	fi
+
+	if [[ ! -d $1/.git ]]
+	then
+		fail "Repo [$1] is not a git repo."
+	fi
+
 	( 
-		cd $(cache_get_home)
-		git checkout master && git fetch origin && git reset --hard origin/master ||
-			fail "Failed to sync cache repository"
+		cd $1
+		git checkout -f master && git fetch origin && git reset --hard origin/master ||
+			fail "Failed to sync repo [$1]"
 	) || exit 1
 }
 
+# usage: cache_repos_get_all
+cache_repos_get_all() {
+	_IFS=$IFS; IFS=$'\n'
+
+	local dirs=( $(cd $bashum_cache_home; find $(pwd) -mindepth 1 -maxdepth 1 -type d) )
+	for dir in ${dirs[@]}
+	do
+		if [[ -d $dir/.git ]]
+		then
+			echo $dir
+		fi
+	done
+
+	IFS=$_IFS
+}
+
+# usage: cache_sync_all
+cache_sync_all() {
+	local repos=( $(cache_repos_get_all) )
+	for repo in ${repos[@]} 
+	do
+		cache_repo_sync $repo 
+	done
+}
+
+# usage: cache_install_all
+cache_install_all() {
+	_IFS=$IFS; IFS="|"
+
+	for url in $bashum_cache_urls
+	do
+		if ! cache_repo_is_installed $url
+		then
+			cache_repo_install $url 
+		fi
+	done
+
+	IFS=$_IFS
+}
+
+# usage: cache_ensure
+cache_ensure() {
+	cache_install_all 
+	cache_sync_all
+}
+
+# usage: cache_bashums_get_all
+cache_bashums_get_all() {
+	(
+		cd $bashum_cache_home; find $(pwd) -maxdepth 2 -type f -name '*.bashum' 
+	)
+}
+
+# usage: cache_search <expression>
 cache_search() {
 	if (( $# != 1 ))
 	then
 		fail 'usage: cache_search <expression>'
 	fi
 
-	(
-		cd $(cache_get_home)
-		find -maxdepth 1 -type f -name '*.bashum' |
-			sed 's|([^-]*)-(.*)\.bashum|\1: \2' 
-	)
+	local bashums=( $(cache_bashums_get_all) )
+	for bashum in ${bashums[@]}
+	do
+		local base_name=$(basename $bashum)
+		if echo $base_name | grep -q $1 
+		then
+			echo $bashum
+		fi
+	done
 }
 
-cache_ensure() {
-	if ! cache_exists 
+# usage: cache_bashum_is_valid_file <file>
+cache_bashum_is_valid_file() {
+	if (( $# != 1 ))
 	then
-		cache_install ||
-			fail "Error installing bashum repo cache"
+		fail 'usage: cache_bashum_is_valid_file <file>'
 	fi
 
-	if ! cache_validate 
-	then
-		cache_delete ||
-			fail "Error removing bashum repo cache"
+	echo $(basename $1) | grep -q '^.*-[0-9].*\.bashum$'; return $?
+}
 
-		cache_install ||
-			fail "Error installing bashum repo cache"
+# usage: cache_bashum_get_name <file>
+cache_bashum_get_name() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: cache_bashum_get_name <file>'
 	fi
 
-	cache_sync ||
-		fail "Error syncing bashum repo."
+	if ! cache_bashum_is_valid_file $1 
+	then
+		fail "Bashum is improperly named: $1"
+	fi
+
+	echo $(basename $1) | sed 's|^\(.*\)-[0-9].*$|\1|'
 }
 
-cache_get_bashum() {
-	:
+# usage: cache_bashum_get_version <file>
+cache_bashum_get_version() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: cache_bashum_get_version <file>'
+	fi
+
+	if ! cache_bashum_is_valid_file $1 
+	then
+		fail "Bashum is improperly named: $1"
+	fi
+
+	echo $(basename $1) | sed 's|^\(.*\)-\([0-9].*\)\.bashum$|\2|'
 }
-
-cache_bashum_is_installed() {
- :
-}
-
-

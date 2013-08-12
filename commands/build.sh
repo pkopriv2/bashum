@@ -96,23 +96,25 @@ build() {
 	# load the project file.
 	project_file_print "$bashum_project_file" 
 
-	# if the /target directory doesn't exist, create it.
-	if [[ ! -d target ]] 
+	# cleanup the staging directory
+	staging_parent_dir=target/staging
+	staging_dir=$staging_parent_dir/$name
+	if [[ -e $staging_dir ]]
 	then
-		mkdir -p target
+		rm -rf $staging_dir
 	fi
 
-	# if there is already the same package, remove it.
-	out=target/$name-$version.bashum
-	if [[ -f $out ]] 
+	# go ahead and create the staging directory
+	if ! mkdir -p $staging_dir
 	then
-		rm -f $out
+		error "Error creating staging directory [$staging_dir]"
+		exit 1
 	fi
 
 	_IFS=$IFS
 	IFS=":"
 
-	# add in standard files 
+	# copy the standard files into the staging directory
 	declare local file 
 	for file in $bashum_project_files
 	do
@@ -120,14 +122,17 @@ build() {
 		then
 			continue
 		fi 
-		griswold -o $out  \
-				 -b $name \
-				 $file						
+
+		if ! cp -r $file $staging_dir
+		then
+			error "Error copying file [$file] to staging dir [$staging_dir]"
+			exit 1
+		fi
 	done
 
 	IFS=$_IFS
 
-	# add in custom files.
+	# copy the custom files into the staging directory
 	for glob in "${file_globs[@]}"
 	do
 		for file in $glob
@@ -137,9 +142,31 @@ build() {
 				continue
 			fi
 
-			griswold -o $out  \
-					 -b $name \
-					 $file						
+			if ! cp -r $file $staging_dir
+			then
+				error "Error copying file [$file] to staging dir [$staging_dir]"
+				exit 1
+			fi
 		done
 	done
+
+
+	# if there is already the same package, remove it.
+	out=$(pwd)/target/$name-$version.bashum
+	if [[ -f $out ]] 
+	then
+		rm -f $out
+	fi
+
+	# build the bashum!
+	(
+		echo "Building output file: $out"
+		builtin cd $staging_parent_dir
+		if ! tar -cf $out $name
+		then
+			error "Error building bashum tar"
+			exit 1
+		fi
+	) || exit 1 
+
 }

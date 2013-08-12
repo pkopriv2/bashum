@@ -56,5 +56,14 @@ search() {
 	fi
 
 	cache_ensure 
-	cache_search $1
+
+
+	local bashums=( $(cache_search $1) )
+	for bashum in ${bashums[@]}
+	do
+		local name=$(cache_bashum_get_name $bashum)
+		local version=$(cache_bashum_get_version $bashum)
+
+		printf '%-30s[%s]\n' "$name" "$version"
+	done
 }
