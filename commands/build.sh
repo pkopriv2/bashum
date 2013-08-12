@@ -150,7 +150,6 @@ build() {
 		done
 	done
 
-
 	# if there is already the same package, remove it.
 	out=$(pwd)/target/$name-$version.bashum
 	if [[ -f $out ]] 

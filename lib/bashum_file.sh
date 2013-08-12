@@ -3,6 +3,11 @@
 require 'lib/console.sh'
 require 'lib/package.sh'
 
+if ! command -v tar &> /dev/null
+then
+	fail "Installation requires a working version of tar." 
+fi
+
 bashum_file_extract_project_file() {
 	# locate the required <name>/project_file.sh
 	local project_file=$(tar -tf $1 | grep '^[^/]*/project.sh')

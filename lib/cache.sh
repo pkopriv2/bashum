@@ -10,6 +10,12 @@ require 'lib/fail.sh'
 # ensure that the cache home exists.
 [[ -d $bashum_cache_home ]] || mkdir -p $bashum_cache_home
 
+# ensure that 'git' is installed 
+if ! command -v git &> /dev/null
+then
+	fail "git is required."
+fi
+
 # usage: cache_repo_get_home <url>
 cache_repo_get_home() {
 	if (( $# != 1 )) 
@@ -182,4 +188,40 @@ cache_bashum_get_version() {
 	fi
 
 	echo $(basename $1) | sed 's|^\(.*\)-\([0-9].*\)\.bashum$|\2|'
+}
+
+
+# usage: cache_bashum_from_name <name> [<version>]
+cache_bashum_from_name() {
+	if (( $# != 1 )) && (( $# != 2 ))
+	then
+		fail 'usage: cache_bashum_from_name <name> [<version>]'
+	fi
+
+	# find everything that matches the input
+	local matches=()
+	for match in $bashum_cache_home/*/$1-${2:-*}.bashum
+	do
+		if [[ -f $match ]]
+		then
+			matches+=( $match )
+		fi
+	done
+
+	# find the lexicographically greatest version (preferring non-snapshots)
+	local max=${matches[0]}
+	for match in ${matches[@]} 
+	do
+		if [[ $match = *SNAPSHOT* ]]
+		then
+			continue
+		fi
+
+		if [[ $match > $max ]]
+		then
+			max=$match
+		fi
+	done
+
+	echo $max
 }

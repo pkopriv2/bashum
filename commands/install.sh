@@ -12,6 +12,7 @@ require 'lib/package.sh'
 require 'lib/project_file.sh'
 require 'lib/bashum_file.sh'
 require 'lib/download.sh'
+require 'lib/cache.sh'
 
 if ! command -v git &> /dev/null
 then
@@ -54,36 +55,119 @@ install() {
 		exit $?
 	fi
 
-	if ! command -v tar &> /dev/null
+	if (( $# < 1 )) 
 	then
-		error "Installation requires a working version of tar." 
+		error "Incorrect number of arguments"
+		usage
 		exit 1
 	fi
 
-	if [[ -z "$1" ]]
+	if is_url $1
 	then
-		error "Must provide either a package name or url."
-		echo 
+		install_from_url $1
+		exit $?
+	fi
 
-		echo -n 'USAGE: '; install_usage 
+	if [[ -f $1 ]]
+	then
+		install_from_file $1
+		exit $?
+	fi
+
+	local expression=$1; shift
+	while (( $# > 0 ))
+	do
+		case "$1" in
+			--version)
+				shift
+				local version=$1
+				;;
+			-*)
+				error "That option [$1] is not allowed"
+				usage
+				exit 1
+				;;
+			*)
+				error "Positional arguments [$1] are not allowed after options"
+				usage
+				exit 1
+		esac 
+		shift
+	done
+
+	install_from_name $expression $version
+}
+
+# usage: is_url <expression>
+is_url() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: is_url <expression>'
+	fi
+
+	echo $1 | grep -q '$http'; return $?
+}
+
+
+# usage: install_from_name <name> [<version>]
+install_from_name() {
+	if (( $# != 1 )) && (( $# != 2 ))
+	then
+		fail 'usage: install_from_name <name> [<version>]'
+	fi
+
+	if package_is_installed $1 $2
+	then
+		error "Package [$1] is already installed with version [>= ${2:-any}]"
 		exit 1
 	fi
 
-	local bashum_file="$1"
-	if ! is_local? "$bashum_file" 
-	then
-		local bashum_file=$bashum_tmp_dir/$(str_random) 
-		download "$1" "$bashum_file"
-	fi
+	cache_ensure
 
-	if [[ ! -f "$bashum_file" ]]
+	local file=$(cache_bashum_from_name $1 $2)
+	if [[ -z $file ]] || [[ ! -f $file ]]
 	then
-		error "That package [$bashum_file] doesn't exist."
+		error "Unable to locate bashum with that name [$1] and version [${2:-any}]"
 		exit 1
-	else
-		git clone ... $bashum_repo
 	fi
 
+	if ! install_from_file $file 
+	then
+		fail "Error installing bashum [$file]"
+	fi
+}
+
+# usage: install_from_url <url>
+install_from_url() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: install_from_url <url>'
+	fi
+
+	local target_file=$bashum_tmp_dir/$(str_random) 
+	if ! download "$1" "$target_file"
+	then
+		fail "Error downloading bashum [$1] to [$target_file]"
+	fi
+
+	if ! install_from_file $target_file 
+	then
+		fail "Error installing bashum [$target_file]"
+	fi
+}
+
+install_from_file() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: install_from_file <file> '
+	fi
+
+	if [[ ! -f $1 ]]
+	then
+		fail "That file [$1] does not exist"
+	fi
+
+	local bashum_file=$1
 	info "Installing bashum file: $bashum_file"
 	echo 
 
@@ -124,17 +208,3 @@ install() {
 	info "Please re-source your environment (open a new terminal session)." 
 }
 
-is_local?() {
-	if [[ -f "$1" ]]
-	then
-		return 0
-	fi
-
-	if echo $1 | grep -q '^http'
-	then
-		return 1
-	fi
-
-	error "Package [$1] is not a local package and is not a url."
-	exit 1
-}

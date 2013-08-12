@@ -45,6 +45,58 @@ project_file_api_unset() {
 	unset -f depends
 }
 
+project_file_get_name() {
+	if [[ -z "$1" ]]
+	then
+		fail 'Must provide a project file.'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+
+	name() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: name <name>"
+		fi
+
+		echo $1
+	}
+
+	source $1
+	project_file_api_unset
+}
+
+project_file_get_version() {
+	if [[ -z "$1" ]]
+	then
+		fail 'Must provide a project file.'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+
+	version() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: version <version>"
+		fi
+
+		echo $1
+	}
+
+	source $1
+	project_file_api_unset
+}
+
 # loads the given project file into the current shell
 # environment.
 project_file_load() {

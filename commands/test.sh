@@ -69,7 +69,6 @@ test() {
 		exit 0 
 	fi
 
-
 	project_file_load $project_file
 
 	declare local dependency

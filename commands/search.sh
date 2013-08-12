@@ -57,7 +57,6 @@ search() {
 
 	cache_ensure 
 
-
 	local bashums=( $(cache_search $1) )
 	for bashum in ${bashums[@]}
 	do
