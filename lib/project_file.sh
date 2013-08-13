@@ -3,8 +3,6 @@
 require 'lib/console.sh'
 require 'lib/fail.sh'
 
-declare bashum_project_file_loaded
-
 project_file_api() {
 	name() {
 		:
@@ -46,9 +44,9 @@ project_file_api_unset() {
 }
 
 project_file_get_name() {
-	if [[ -z "$1" ]]
+	if (( $# != 1 ))
 	then
-		fail 'Must provide a project file.'
+		fail 'usage: project_file_get_name <file>'
 	fi
 
 	if [[  ! -f "$1" ]]
@@ -57,7 +55,6 @@ project_file_get_name() {
 	fi
 
 	project_file_api
-
 	name() {
 		if (( $# != 1 ))
 		then
@@ -72,9 +69,9 @@ project_file_get_name() {
 }
 
 project_file_get_version() {
-	if [[ -z "$1" ]]
+	if (( $# != 1 ))
 	then
-		fail 'Must provide a project file.'
+		fail 'usage: project_file_get_version <file>'
 	fi
 
 	if [[  ! -f "$1" ]]
@@ -83,7 +80,6 @@ project_file_get_version() {
 	fi
 
 	project_file_api
-
 	version() {
 		if (( $# != 1 ))
 		then
@@ -97,12 +93,10 @@ project_file_get_version() {
 	project_file_api_unset
 }
 
-# loads the given project file into the current shell
-# environment.
-project_file_load() {
-	if [[ -z "$1" ]]
+project_file_get_globs() {
+	if (( $# != 1 ))
 	then
-		fail 'Must provide a project file.'
+		fail 'usage: project_file_get_globs <file>'
 	fi
 
 	if [[  ! -f "$1" ]]
@@ -110,72 +104,32 @@ project_file_load() {
 		fail "Input [$1] is not a file."
 	fi
 
-	if [[ "$bashum_project_file_loaded" == "$1" ]]
-	then
-		return 0 # already loaded
-	fi
-
-	name=""
-	name() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: name <name>"
-		fi
-
-		name=$1
-	}
-
-	version=""
-	version() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: version <version>"
-		fi
-
-		version=$1
-	}
-
-	author=""
-	author() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: author <author>"
-		fi
-
-		author=$1
-	}
-
-	email=""
-	email() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: email <email>"
-		fi
-
-		email=$1
-	}
-
-	description=""
-	description() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: description <description>"
-		fi
-
-		description=$1
-	}
-
-	file_globs=()
+	project_file_api
 	file() {
 		if (( $# != 1 ))
 		then
 			fail "Usage: file <glob>"
 		fi
-
-		file_globs+=( "$1" )
+		
+		echo "$1"
 	}
 
-	dependencies=()
+	source $1
+	project_file_api_unset
+}
+
+project_file_get_dependencies() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_name <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
 	depends() {
 		if (( $# < 1 )) || (( $# > 2 )) 
 		then
@@ -185,49 +139,116 @@ project_file_load() {
 		if [[ -z $1 ]]
 		then
 			fail "Must provide at least a name"
-
 		fi
-		
-		dependencies+=( "$1:$2" )
+
+		echo "$1:$2"
 	}
 
 	source $1
-	bashum_project_file_loaded=$1 
-
-	# ensure that everything was set appropriately
-	if [[ -z "$name" ]]
-	then
-		error "Project file [$1] must provide a valid project name."
-		exit 1
-	fi
-
-	if [[ -z "$version" ]]
-	then
-		error "Project file [$1] must provide a valid project version."
-		exit 1
-	fi
-
-	unset -f name
-	unset -f version
-	unset -f author 
-	unset -f email 
-	unset -f description
-	unset -f file
-	unset -f depends
+	project_file_api_unset
 }
 
 project_file_print() {
-	if [[ -z "$1" ]]
+	if (( $# != 1 ))
 	then
-		fail 'Must provide a project file.'
+		fail 'usage: project_file_print <file>'
 	fi
 
 	if [[  ! -f "$1" ]]
 	then
 		fail "Project file [$1] does not exist"
 	fi
+	
+	project_file_api
 
-	project_file_load "$1"
+	local name=""
+	name() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: name <name>"
+		fi
+
+		name=$1
+	}
+
+	local version=""
+	version() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: version <version>"
+		fi
+
+		version=$1
+	}
+
+	local author=""
+	author() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: author <author>"
+		fi
+
+		author=$1
+	}
+
+	local email=""
+	email() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: email <email>"
+		fi
+
+		email=$1
+	}
+
+	local description=""
+	description() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: description <description>"
+		fi
+
+		description=$1
+	}
+
+	local file_globs=()
+	file() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: file <glob>"
+		fi
+
+		file_globs+=( "$1" )
+	}
+
+	local dependencies=()
+	depends() {
+		if (( $# < 1 )) || (( $# > 2 )) 
+		then
+			fail "Usage: depends <project> [<version>]"
+		fi
+
+		if [[ -z $1 ]]
+		then
+			fail "Must provide at least a name"
+		fi
+		
+		dependencies+=( "$1:$2" )
+	}
+
+	source $1
+	project_file_api_unset
+
+	# ensure that everything was set appropriately
+	if [[ -z "$name" ]]
+	then
+		fail "Project file [$1] must provide a valid project name."
+	fi
+
+	if [[ -z "$version" ]]
+	then
+		fail "Project file [$1] must provide a valid project version."
+	fi
 
 	info "Name:"
 	echo "    - $name" 
@@ -256,6 +277,30 @@ project_file_print() {
 		info "Description:"
 		echo "    - $description"
 		echo
+	fi
+
+	# print the executables
+	if (( ${#executables[@]} > 0 ))
+	then
+		info "Executables: " 
+		declare local file
+		for file in "${executables[@]}" 
+		do
+			echo "    - $(basename $file)"
+		done
+		echo 
+	fi
+
+	# print the library files
+	if (( ${#libs[@]} > 0 ))
+	then
+		info "Libraries: " 
+		declare local file
+		for file in "${libs[@]}" 
+		do
+			echo "    - ${file##*$name}"
+		done
+		echo 
 	fi
 
 	if (( "${#file_globs}" > 0 ))

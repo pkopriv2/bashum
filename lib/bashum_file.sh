@@ -2,30 +2,42 @@
 
 require 'lib/console.sh'
 require 'lib/package.sh'
+require 'lib/string.sh'
 
 if ! command -v tar &> /dev/null
 then
 	fail "Installation requires a working version of tar." 
 fi
 
+# usage: bashum_file_extract_project_file <file>
 bashum_file_extract_project_file() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: bashum_file_extract_project_file <file>'
+	fi
+
 	# locate the required <name>/project_file.sh
 	local project_file=$(tar -tf $1 | grep '^[^/]*/project.sh')
 	if [[ -z $project_file ]]
 	then
-		error "Package [$1] is missing a project.sh file."
-		exit 1
+		fail "Package [$1] is missing a project.sh file."
+	fi
+
+	# make a tmp directory
+	local output_dir=$bashum_tmp_dir/$1_$(str_random)
+	if ! mkdir -p $output_dir
+	then
+		fail "Error making output directory [$output_dir]"
 	fi
 
 	# extract the project file (to temp location)
-	if ! tar -C $bashum_tmp_dir -xvf "$1" "$project_file" &> /dev/null
+	if ! tar -C $output_dir -xvf "$1" "$project_file" &> /dev/null
 	then
-		error "That package [$1] is corrupted"
-		exit 1
+		fail "That package [$1] is corrupted"
 	fi
 
 	# finally, echo the location to the file. 
-	echo "$bashum_tmp_dir/$project_file" 
+	echo "$output_dir/$project_file" 
 }
 
 bashum_file_get_executables() {
@@ -62,35 +74,27 @@ bashum_file_get_libs() {
 	tar -tf $bashum_file | grep '^[^/]*/lib/.' 
 }
 
-bashum_file_validate() {
-	# package_info
-	local project_file=$(bashum_file_extract_project_file $1) 
+# usage: bashum_file_is_installable <file>
+bashum_file_is_installable() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: bashum_file_is_installable <file>'
+	fi
 
-	# load the project file.
-	project_file_load $project_file
+	declare local project_file
+	if ! project_file=$(bashum_file_extract_project_file $1) 
+	then
+		return 1
+	fi
 
 	# ensure that the structure is expected.
-	declare local file
+	local name=$(project_file_get_name $project_file)
 	for file in $(tar -tf $1) 
 	do
 		if ! echo "$file" | grep -q "^$name"
 		then
-			error "That bashum [$1] is corrupted.  Unexpected file: $file"
-			exit 1
-		fi
-	done
-
-	# validate the dependencies
-	declare local dependency
-	for dependency in "${dependencies[@]}"
-	do 
-		local dep_name=${dependency%%:*}
-		local dep_version=${dependency##*:}
-
-		if ! package_is_installed $dep_name $dep_version
-		then
-			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
-			exit 1
+			echo "That bashum [$1] is corrupted.  Unexpected file: $file" 1>&2
+			return 1
 		fi
 	done
 }

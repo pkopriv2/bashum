@@ -86,7 +86,7 @@ package_get_dependers() {
 		fail "Package [$1] is missing a project file."
 	fi
 
-	project_file_load $project_file
+	local name=$(project_file_get_name $project_file) 
 
 	(
 		# iterate over *all* other projects looking for those 
@@ -268,3 +268,28 @@ package_remove_executables() {
 		fi
 	done
 }
+
+# usage: package_remove <name>
+package_remove() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: package_remove <name>'
+	fi
+
+	if ! package_is_installed $1 
+	then
+		fail "Package is not installed [$1]"
+	fi
+
+	if ! package_remove_executables "$1"
+	then
+		fail "Error removing executables for package [$1]"
+	fi
+
+	local package_home=$(package_get_home $1)
+	if ! rm -r $package_home
+	then
+		fail "Error deleting package: $package_home"
+	fi
+}
+

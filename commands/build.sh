@@ -96,6 +96,10 @@ build() {
 	# load the project file.
 	project_file_print "$bashum_project_file" 
 
+	# okay, load the things necessary for building the archive.
+	local name=$(project_file_get_name $bashum_project_file)
+	local version=$(project_file_get_version $bashum_project_file)
+
 	# cleanup the staging directory
 	staging_parent_dir=target/staging
 	staging_dir=$staging_parent_dir/$name
@@ -133,6 +137,7 @@ build() {
 	IFS=$_IFS
 
 	# copy the custom files into the staging directory
+	local file_globs=$(project_file_get_globs $bashum_project_file)
 	for glob in "${file_globs[@]}"
 	do
 		for file in $glob

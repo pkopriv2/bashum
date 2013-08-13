@@ -58,12 +58,46 @@ list() {
 
 	for project_file in $(ls $bashum_repo/packages/*/project.sh 2>/dev/null)
 	do
-		project_file_load $project_file
+		project_file_api 
+
+		local name=""
+		name() {
+			if (( $# != 1 ))
+			then
+				fail "Usage: name <name>"
+			fi
+
+			name=$1
+		}
+
+		local version=""
+		version() {
+			if (( $# != 1 ))
+			then
+				fail "Usage: version <version>"
+			fi
+
+			version=$1
+		}
+
+		local description=""
+		description() {
+			if (( $# != 1 ))
+			then
+				fail "Usage: description <description>"
+			fi
+
+			description=$1
+		}
+
+		source $project_file
+		project_file_api_unset
+
 		printf "\t- %s" "$name [$version]" 
 
 		if [[ -n $description ]] && $detailed
 		then
-			echo "    - $description"
+			echo " - $description"
 		else 
 			echo
 		fi

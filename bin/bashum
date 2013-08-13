@@ -3,7 +3,6 @@
 export bashum_cmd=${bashum_cmd:-bashum}
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
-export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 export bashum_version="1.0.4"
 
 source $bashum_home/lib/require.sh
@@ -12,6 +11,9 @@ set -o errexit
 set -o errtrace 
 
 require 'lib/console.sh'
+require 'lib/string.sh'
+
+export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum_$(str_random)/}
 
 # ensure all the required directories are there.
 [[ -d $bashum_repo ]]          || mkdir -p $bashum_repo

@@ -41,15 +41,12 @@ test() {
 		exit $?
 	fi
 
-
 	local project_file=$bashum_project_file 
 	if [[ ! -f $project_file ]]
 	then
 		error "Unable to locate project.sh." 
 		exit 1
 	fi
-
-
 
 	if [[ -n $1 ]]
 	then
@@ -69,7 +66,7 @@ test() {
 		exit 0 
 	fi
 
-	project_file_load $project_file
+	local dependencies=( $(project_file_get_dependencies $project_file) )
 
 	declare local dependency
 	for dependency in "${dependencies[@]}"

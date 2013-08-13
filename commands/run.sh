@@ -69,7 +69,7 @@ run() {
 		exit 1
 	fi
 
-	project_file_load $project_file
+	local dependencies=( $(project_file_get_dependencies $project_file) )
 
 	declare local dependency
 	for dependency in "${dependencies[@]}"

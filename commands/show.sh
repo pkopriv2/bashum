@@ -102,28 +102,4 @@ show() {
 	# print the project file.
 	project_file_print "$project_file"
 	echo 
-
-	# print the executables
-	if (( ${#executables[@]} > 0 ))
-	then
-		info "Executables: " 
-		declare local file
-		for file in "${executables[@]}" 
-		do
-			echo "    - $(basename $file)"
-		done
-		echo 
-	fi
-
-	# print the library files
-	if (( ${#libs[@]} > 0 ))
-	then
-		info "Libraries: " 
-		declare local file
-		for file in "${libs[@]}" 
-		do
-			echo "    - ${file##*$name}"
-		done
-		echo 
-	fi
 }

@@ -49,6 +49,14 @@ install_help() {
 }
 
 install() {
+	usage() {
+		bold 'USAGE'
+
+		echo 
+		printf "\t"; install_usage
+		echo
+	}
+
 	if help? "$@" 
 	then
 		install_help "$@"
@@ -65,13 +73,13 @@ install() {
 	if is_url $1
 	then
 		install_from_url $1
-		exit $?
+		return $?
 	fi
 
 	if [[ -f $1 ]]
 	then
 		install_from_file $1
-		exit $?
+		return $?
 	fi
 
 	local expression=$1; shift
@@ -95,7 +103,8 @@ install() {
 		shift
 	done
 
-	install_from_name $expression $version
+	install_from_name $expression $version 
+	return $?
 }
 
 # usage: is_url <expression>
@@ -156,6 +165,7 @@ install_from_url() {
 	fi
 }
 
+# usage: install_from_file <file>
 install_from_file() {
 	if (( $# != 1 ))
 	then
@@ -167,44 +177,63 @@ install_from_file() {
 		fail "That file [$1] does not exist"
 	fi
 
-	local bashum_file=$1
-	info "Installing bashum file: $bashum_file"
-	echo 
-
-	local project_file=$(bashum_file_extract_project_file "$bashum_file")
-	project_file_print "$project_file"
-	echo
-
-	echo -n "Validating bashum file. "
-	bashum_file_validate "$bashum_file"
-	echo "Done."
-
-	local package_home=$(package_get_home "$name")
-	if [[ -d $package_home ]]
+	if ! bashum_file_is_installable "$1"
 	then
-		echo -n "Removing old executables. "
-		package_remove_executables "$name"
-		echo "Done."
-
-		echo -n "Removing old package. "
-		if ! rm -r $package_home 
-		then
-			error "Error removing old package: $package_home"
-			exit 1
-		fi
-		echo "Done."
+		error "Error validating bashum [$1]"
+		exit 1
 	fi
 
-	echo -n "Unpacking bashum file. "
-	tar -xf "$bashum_file" -C $bashum_repo/packages 
-	echo "Done."
+	local project_file=$(bashum_file_extract_project_file "$1")
+	if ! install_dependencies $project_file
+	then
+		error "Error installing dependencies"
+		exit 1
+	fi
 
-	echo -n "Generating executables. " 
-	package_generate_executables "$name"
-	echo "Done."
-	echo
+	local name=$(project_file_get_name $project_file)
+	echo "Installing bashum [$name]"
+
+	if package_is_installed $name 
+	then
+		if ! package_remove $name
+		then
+			error "Error removing previously installed package."
+			exit 1
+		fi
+	fi
+
+	tar -xf "$1" -C $bashum_repo/packages 
+	if ! package_generate_executables "$name"
+	then
+		error "Error generating package executables: $name"
+		exit 1
+	fi
 
 	info "Successfully installed package: $name" 
-	info "Please re-source your environment (open a new terminal session)." 
+	echo "Please re-source your environment (open a new terminal session)." 
 }
 
+# usage: install_dependencies <project_file>
+install_dependencies() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: install_dependencies <project_file>'
+	fi
+
+	# validate the dependencies (try to install them if they're not already installed)
+	local dependencies=( $(project_file_get_dependencies $1) )
+	for dependency in "${dependencies[@]}"
+	do 
+		local dep_name=${dependency%%:*}
+		local dep_version=${dependency##*:}
+
+		if ! package_is_installed $dep_name $dep_version
+		then
+			if ! install $dep_name --version $dep_version
+			then
+				echo "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
+				return 1
+			fi
+		fi
+	done
+}
