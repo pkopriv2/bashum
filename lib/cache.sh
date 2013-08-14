@@ -142,8 +142,10 @@ cache_search() {
 	local bashums=( $(cache_bashums_get_all) )
 	for bashum in ${bashums[@]}
 	do
-		local base_name=$(basename $bashum)
-		if echo $base_name | grep -q $1 
+		declare local name
+
+		name=$(cache_bashum_get_name $bashum) || name=$(basename $bashum)
+		if echo $name | grep -q $1 
 		then
 			echo $bashum
 		fi

@@ -66,29 +66,18 @@ test() {
 		exit 0 
 	fi
 
-	local dependencies=( $(project_file_get_dependencies $project_file) )
-
-	declare local dependency
-	for dependency in "${dependencies[@]}"
-	do 
-		local dep_name=${dependency%%:*}
-		local dep_version=${dependency##*:}
-
-		if ! package_is_installed $dep_name $dep_version
-		then
-			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
-			exit 1
-		fi
-	done
-
-	local cwd=$(pwd)
-	export PATH=$cwd/bin:$PATH
-	export bashum_path=$cwd:$bashum_path
-	export project_root=$cwd
+	ensure_dependencies $project_file
 
 	(
 		set +o errexit # turn off errexit for the test run
 
+		# export the expected global vars
+		local cwd=$(pwd)
+		export PATH=$cwd/bin:$PATH
+		export bashum_path=$cwd:$bashum_path
+		export project_root=$cwd
+
+		# source all the project's environment files.
 		if [[ -d env ]]
 		then
 			for file in $(ls env/*.sh)
@@ -100,27 +89,24 @@ test() {
 			done
 		fi
 
+		# remove any existing test functions.
+		local existing_tests=$(get_all_test_functions)
+		for t in ${existing_tests[@]} 
+		do
+			unset -f $t
+		done
+
+		echo "Running tests: ${test_files[@]}"
 		for test_file in ${test_files[@]}
 		do
-			echo "Running tests for: $test_file" 
+			echo; echo "Running tests for: $test_file" 
 
 			(
 				source $test_file 
 
-				# find all the test functions
-				local tests=$( declare -F | grep 'test_.*' | sed 's|declare -f||' )
+				local tests=$(get_all_test_functions)
 				for fn in ${tests[@]}
 				do
-					if [[ $fn == "test_help" ]]
-					then
-						continue
-					fi
-
-					if [[ $fn == "test_usage" ]]
-					then
-						continue
-					fi
-
 					if declare -F before &> /dev/null
 					then
 						before || {
@@ -129,8 +115,15 @@ test() {
 						}
 					fi
 
-					echo "Running test: $fn"
-					$fn || {
+					echo -n "Running test: $fn: "
+
+					(
+						$fn  
+						echo "Passed"
+
+					) || {
+						echo "Failed"
+
 						error "Error running test: $fn"
 						exit 1
 					}
@@ -144,4 +137,38 @@ test() {
 		error "Tests failed to execute."
 		exit 1
 	}
+}
+
+# usage: get_all_test_functions 
+#
+# Returns all the functions that start with test_ in the current 
+# subshell.
+get_all_test_functions() {
+ 	declare -F | grep ' test_.*' | sed 's|declare -f||' 
+}
+
+# usage: ensure_dependencies <project_file>
+ensure_dependencies() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: ensure_dependencies <project_file>'
+	fi
+
+	if [[ ! -f $1 ]]
+	then
+		fail "That [$1] is not a valid project file."
+	fi
+
+	local dependencies=( $(project_file_get_dependencies $1) )
+	for dependency in "${dependencies[@]}"
+	do 
+		local dep_name=${dependency%%:*}
+		local dep_version=${dependency##*:}
+
+		if ! package_is_installed $dep_name $dep_version
+		then
+			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
+			exit 1
+		fi
+	done
 }
