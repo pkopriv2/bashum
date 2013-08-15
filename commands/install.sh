@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 
-export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
@@ -12,7 +11,8 @@ require 'lib/package.sh'
 require 'lib/project_file.sh'
 require 'lib/bashum_file.sh'
 require 'lib/download.sh'
-require 'lib/cache.sh'
+
+require 'lib/bashum/remote.sh'
 
 if ! command -v git &> /dev/null
 then
@@ -131,9 +131,9 @@ install_from_name() {
 		exit 1
 	fi
 
-	cache_ensure
+	remote_repos_ensure_all
 
-	local file=$(cache_bashum_from_name $1 $2)
+	local file=$(remote_bashum_from_name $1 $2)
 	if [[ -z $file ]] || [[ ! -f $file ]]
 	then
 		error "Unable to locate bashum with that name [$1] and version [${2:-any}]"

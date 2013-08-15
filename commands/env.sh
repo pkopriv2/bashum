@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+require 'lib/console.sh'
+require 'lib/fail.sh'
+require 'lib/help.sh'
+
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_path=${bashum_path:-$bashum_home:$bashum_repo/packages}
@@ -38,13 +42,7 @@ env() {
 	info "Environment entries:"
 	echo 
 
-	local entries=( \
-		bashum_home \
-		bashum_repo \
-		bashum_path \
-		bashum_project_files \
-	)
-
+	local entries=( ${!bashum*} )
 	for entry in "${entries[@]}"
 	do
 		printf '\t%s: %s\n' "$entry" "$(eval "echo \$$entry")"

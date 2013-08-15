@@ -1,14 +1,9 @@
-
 #! /usr/bin/env bash
-
-export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
-export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
 require 'lib/console.sh'
 require 'lib/fail.sh'
 require 'lib/help.sh'
-require 'lib/cache.sh'
+require 'lib/bashum/remote.sh'
 
 search_usage() {
 	echo "$bashum_cmd search <package> [options]"
@@ -55,13 +50,19 @@ search() {
 		exit 1
 	fi
 
-	cache_ensure 
+	remote_repos_ensure_all 
 
-	local bashums=( $(cache_search $1) )
+	local bashums=( $(remote_bashums_search $1) )
 	for bashum in ${bashums[@]}
 	do
-		local name=$(cache_bashum_get_name $bashum)
-		local version=$(cache_bashum_get_version $bashum)
+		declare local name
+		declare local version
+
+		name=$(remote_bashum_get_name $bashum) || 
+			name=$bashum
+
+		version=$(remote_bashum_get_version $bashum) || 
+			version=""
 
 		printf '%-30s[%s]\n' "$name" "$version"
 	done
