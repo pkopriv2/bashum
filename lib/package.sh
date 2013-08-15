@@ -2,6 +2,10 @@
 
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
+[[ -d $bashum_repo ]]          || mkdir -p $bashum_repo
+[[ -d $bashum_repo/packages ]] || mkdir -p $bashum_repo/packages
+[[ -d $bashum_repo/bin ]]      || mkdir -p $bashum_repo/bin
+
 require 'lib/console.sh'
 require 'lib/fail.sh'
 require 'lib/project_file.sh'

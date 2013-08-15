@@ -2,103 +2,56 @@
 
 export bashum_cmd=${bashum_cmd:-bashum}
 export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
-export bashum_version="1.0.4"
 
 source $bashum_home/lib/require.sh
 
 set -o errexit 
 set -o errtrace 
 
+require 'lib/tmp.sh' # for passivity
+require 'lib/command.sh'
 require 'lib/console.sh'
 require 'lib/string.sh'
 
-export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum_$(str_random)/}
+require 'commands/help.sh'
 
-# ensure all the required directories are there.
-[[ -d $bashum_repo ]]          || mkdir -p $bashum_repo
-[[ -d $bashum_repo/packages ]] || mkdir -p $bashum_repo/packages
-[[ -d $bashum_repo/bin ]]      || mkdir -p $bashum_repo/bin
-
-# make a tmp directory as a sandbox
-[[ ! -d $bashum_tmp_dir ]]     || rm -r $bashum_tmp_dir
-
-mkdir -p $bashum_tmp_dir
-
-# cleanup on exit.
-on_exit() {
-	rm -r $bashum_tmp_dir
-} 
-
-trap "on_exit" EXIT
-
-bashum_help() {
-	bold "BASHUM HELP"
-	echo 
-
-	printf "%s\n" '
-	Bashum is a package manager for bash projects.  It provides support
-	for building, installing, and maintaining .bashum files.  
-'
-
-	bold "COMMANDS"
-	echo
-
-	for command in $bashum_home/commands/*.sh
-	do
-		source $command
-
-		cmd=$(basename $command)
-		cmd=${cmd/.sh/}
-
-		printf "\t"; "$cmd"_usage "$@" 
-	done
-	echo 
-
-	bold 'MORE INFO'
-	printf "%s\n" '
-	To get more detailed help, simply type bashum <command> help [--detailed]
-
-'
-}
-
-bashum_version() {
-	bold "BASHUM VERSION"
-
-	printf "%s\n" "
-	$bashum_version
-"
-}
-
-args=( "${@}" )
-action="${args[0]}"
-
-if [[ -z $action ]] 
+# if no args are provided, then go to the help menu
+if (( $# == 0 ))
 then
-	bashum_help
-	exit $?
-fi
-shift
-
-if [[ ! -f $bashum_home/commands/"$action".sh ]]
-then
-	case "$action" in
-		help|-h|--help)
-			bashum_help 
-			;;
-		version|-v|--version)
-			bashum_version
-			;;
-		*)
-			error "That sub-command is not supported."
-			echo
-			bashum_help
-			;;
-	esac
-
+	help
 	exit $?
 fi
 
-require "commands/$action.sh"
-$action "$@"
+# see if the user was aiming for help
+case "$1" in
+	help|-h|--help)
+		shift
+
+		help "$@"
+		exit $?
+		;;
+	#version|-v|--version)
+		#shift
+
+		#version "$@"
+		#exit $?
+		#;;
+esac
+
+
+# try to get the command
+if ! cmd_tuple=( $(command_get_from_args "$@" ) ) 
+then
+	error "Unabe to locate command for args: $*"
+	echo 
+
+	help 
+	exit 1
+fi
+
+# load the command
+source ${cmd_tuple[0]}
+
+# execute the command
+$(command_get_main_fn ${cmd_tuple[0]}) "${cmd_tuple[@]:1}"
 exit $?
