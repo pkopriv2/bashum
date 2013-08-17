@@ -5,10 +5,12 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
 export bashum_project_file=${bashum_project_file:-"project.sh"}
 
-require 'lib/console.sh'
-require 'lib/help.sh'
-require 'lib/project_file.sh'
-require 'lib/package.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
+
+require 'lib/bashum/project_file.sh'
+require 'lib/bashum/package.sh'
+require 'lib/bashum/install.sh'
 
 test_usage() {
 	echo "$bashum_cmd test [<expression>]"
@@ -35,7 +37,7 @@ test_help() {
 }
 
 test() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		test_help "$@"
 		exit $?
@@ -66,7 +68,7 @@ test() {
 		exit 0 
 	fi
 
-	ensure_dependencies $project_file
+	install_dependencies $project_file
 
 	(
 		set +o errexit # turn off errexit for the test run
@@ -145,30 +147,4 @@ test() {
 # subshell.
 get_all_test_functions() {
  	declare -F | grep ' test_.*' | sed 's|declare -f||' 
-}
-
-# usage: ensure_dependencies <project_file>
-ensure_dependencies() {
-	if (( $# != 1 ))
-	then
-		fail 'usage: ensure_dependencies <project_file>'
-	fi
-
-	if [[ ! -f $1 ]]
-	then
-		fail "That [$1] is not a valid project file."
-	fi
-
-	local dependencies=( $(project_file_get_dependencies $1) )
-	for dependency in "${dependencies[@]}"
-	do 
-		local dep_name=${dependency%%:*}
-		local dep_version=${dependency##*:}
-
-		if ! package_is_installed $dep_name $dep_version
-		then
-			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
-			exit 1
-		fi
-	done
 }

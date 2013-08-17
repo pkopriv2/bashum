@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
 
 project_file_api() {
 	name() {

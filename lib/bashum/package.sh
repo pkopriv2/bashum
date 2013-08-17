@@ -1,14 +1,34 @@
 #! /usr/bin/env bash
 
+require 'lib/bashum/project_file.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
+
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 [[ -d $bashum_repo ]]          || mkdir -p $bashum_repo
 [[ -d $bashum_repo/packages ]] || mkdir -p $bashum_repo/packages
 [[ -d $bashum_repo/bin ]]      || mkdir -p $bashum_repo/bin
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/project_file.sh'
+# usage: package_repo_get_package_root
+package_repo_get_package_root() {
+	if (( $# != 0 ))
+	then
+		fail 'usage: package_get_root'
+	fi
+
+	echo $bashum_repo/packages
+}
+
+# usage: package_repo_get_bin_root
+package_repo_get_bin_root() {
+	if (( $# != 0 ))
+	then
+		fail 'usage: package_repo_get_bin_root'
+	fi
+
+	echo $bashum_repo/bin
+}
 
 # usage: package_get_home <name>
 package_get_home() {
@@ -69,7 +89,6 @@ package_is_installed() {
 	# then return true. 
 	[[ "$version" > "$2" ]] || [[ "$version" == "$2" ]]; return $?
 }
-
 
 # usage: package_get_dependers <name>
 package_get_dependers() {
@@ -267,8 +286,7 @@ package_remove_executables() {
 
 		if ! rm $wrapper 
 		then
-			error "Error deleting executable [$wrapper]"
-			exit 1 
+			fail "Error deleting executable [$wrapper]"
 		fi
 	done
 }

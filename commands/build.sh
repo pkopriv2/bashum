@@ -1,11 +1,11 @@
-#! /usr/bin/env bash
+#! commands/build.sh
 
 export bashum_project_file=${bashum_project_file:-"project.sh"}
-export bashum_project_files=${bashum_project_files:-"bin:lib:env:project.sh"}
 
-require 'lib/project_file.sh'
-require 'lib/console.sh'
-require 'lib/help.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/project_file.sh'
+require 'lib/bashum/archive.sh'
 
 build_usage() {
 	echo "$bashum_cmd build [options]"
@@ -30,7 +30,7 @@ build_help() {
 
 '
 
-	if help_detailed? "$@"
+	if options_is_detailed_help "$@"
 	then
 		build_help_detailed
 		return $?
@@ -76,7 +76,7 @@ depends "other" "1.0.0"
 }
 
 build() {
-	if help? "$@"
+	if options_is_help "$@"
 	then
 		build_help "$@"
 		exit $?
@@ -96,81 +96,6 @@ build() {
 	# load the project file.
 	project_file_print "$bashum_project_file" 
 
-	# okay, load the things necessary for building the archive.
-	local name=$(project_file_get_name $bashum_project_file)
-	local version=$(project_file_get_version $bashum_project_file)
-
-	# cleanup the staging directory
-	staging_parent_dir=target/staging
-	staging_dir=$staging_parent_dir/$name
-	if [[ -e $staging_dir ]]
-	then
-		rm -rf $staging_dir
-	fi
-
-	# go ahead and create the staging directory
-	if ! mkdir -p $staging_dir
-	then
-		error "Error creating staging directory [$staging_dir]"
-		exit 1
-	fi
-
-	_IFS=$IFS
-	IFS=":"
-
-	# copy the standard files into the staging directory
-	declare local file 
-	for file in $bashum_project_files
-	do
-		if [[ ! -f $file && ! -d $file ]]
-		then
-			continue
-		fi 
-
-		if ! cp -r $file $staging_dir
-		then
-			error "Error copying file [$file] to staging dir [$staging_dir]"
-			exit 1
-		fi
-	done
-
-	IFS=$_IFS
-
-	# copy the custom files into the staging directory
-	local file_globs=$(project_file_get_globs $bashum_project_file)
-	for glob in "${file_globs[@]}"
-	do
-		for file in $glob
-		do
-			if [[ ! -f $file && ! -d $file ]]
-			then
-				continue
-			fi
-
-			if ! cp -r $file $staging_dir
-			then
-				error "Error copying file [$file] to staging dir [$staging_dir]"
-				exit 1
-			fi
-		done
-	done
-
-	# if there is already the same package, remove it.
-	out=$(pwd)/target/$name-$version.bashum
-	if [[ -f $out ]] 
-	then
-		rm -f $out
-	fi
-
-	# build the bashum!
-	(
-		echo "Building output file: $out"
-		builtin cd $staging_parent_dir
-		if ! tar -cf $out $name
-		then
-			error "Error building bashum tar"
-			exit 1
-		fi
-	) || exit 1 
-
+	# okay, build the bashum
+	archive_build
 }

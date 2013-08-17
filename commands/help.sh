@@ -1,5 +1,5 @@
-require 'lib/command.sh'
-require 'lib/console.sh'
+require 'lib/bashum/cli/command.sh'
+require 'lib/bashum/cli/console.sh'
 
 help() {
 	bold "BASHUM HELP"

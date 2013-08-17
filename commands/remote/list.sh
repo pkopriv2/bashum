@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/cli/options.sh'
 require 'lib/bashum/remote.sh'
 
 remote_list_usage() {
@@ -30,13 +30,14 @@ remote_list_help() {
 }
 
 remote_list() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		remote_list_help "$@"
 		exit $?
 	fi
 
 	info "Remote Repositories:"
+	echo 
 
 	local urls=( $(remote_repo_urls_get_all) ) 
 	for url in ${urls[@]} 

@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
+require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
 require 'lib/bashum/remote.sh'
 
 search_usage() {
@@ -18,7 +18,8 @@ search_help() {
 
 	bold 'DESCRIPTION'
 	printf '%s' '
-	Searches the remote repository for bashums to install.
+	Searches the remote repository for bashums matching the given expressions.  
+	Search expressions should be in a form compatible with grep. 
 
 '
 
@@ -30,7 +31,7 @@ search_help() {
 }
 
 search() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		search_help "$@"
 		exit $?

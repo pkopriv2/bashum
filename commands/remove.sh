@@ -2,11 +2,11 @@
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
-require 'lib/project_file.sh'
-require 'lib/package.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/project_file.sh'
+require 'lib/bashum/package.sh'
 
 remove_usage() {
 	echo "$bashum_cmd remove <package> [options]"
@@ -36,7 +36,7 @@ remove_help() {
 }
 
 remove() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		remove_help "$@"
 		exit $?
@@ -51,8 +51,7 @@ remove() {
 		exit 1
 	fi
 
-	local package_home=$(package_get_home "$1")
-	if [[ ! -d "$package_home" ]]
+	if ! package_is_installed $1 
 	then
 		error "That package [$1] is not installed"
 		exit 1
@@ -67,6 +66,8 @@ remove() {
 		exit 0
 	fi
 
+	# TODO: Enhance to remove unneeded dependencies.
+
 	local dependers=( $(package_get_dependers "$1") )
 	if (( ${#dependers[@]} > 0 ))
 	then
@@ -74,13 +75,6 @@ remove() {
 		exit 1
 	fi
 
-	package_remove_executables "$1"
-	if ! rm -r $package_home
-	then
-		error "Error deleting package: $package_home"
-		exit 1
-	fi
-
+	package_remove $1
 	info "Successfully removed: $1"
-	echo
 }

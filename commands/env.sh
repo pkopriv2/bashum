@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/cli/options.sh'
 
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
@@ -33,7 +33,7 @@ env_help() {
 }
 
 env() {
-	if help? $@
+	if options_is_help $@
 	then
 		env_help $@
 		exit $?

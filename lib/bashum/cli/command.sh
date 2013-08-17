@@ -1,3 +1,5 @@
+require 'lib/bashum/lang/fail.sh'
+
 export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_command_home=${bashum_command_home:-$bashum_home/commands}
 

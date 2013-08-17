@@ -1,16 +1,17 @@
 #! /usr/bin/env bash
 
-export bashum_home=${bashum_home:-$HOME/.bashum}
-export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/lang/string.sh'
+require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/util/download.sh'
+require 'lib/bashum/util/tmp.sh'
 
-require 'lib/console.sh'
-require 'lib/download.sh'
-require 'lib/string.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
-require 'lib/package.sh'
-require 'lib/project_file.sh'
-require 'lib/bashum_file.sh'
+require 'lib/bashum/archive.sh'
+require 'lib/bashum/package.sh'
+require 'lib/bashum/project_file.sh'
+
+export bashum_home=${bashum_home:-$HOME/.bashum}
 
 show_usage() {
 	echo "$bashum_cmd show <package> [options]"
@@ -44,7 +45,7 @@ show_help() {
 # Installs or updates a package
 #
 show() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		show_help "$@"
 		exit $?
@@ -70,18 +71,18 @@ show() {
 	# see if the input is a url
 	if echo $arg | grep -q '^http' 
 	then
-		local bashum_file=$bashum_tmp_dir/$(str_random)
-		download "$arg" "$bashum_file"
-		local arg=$bashum_file
+		local archive=$bashum_tmp_dir/$(str_random)
+		download "$arg" "$archive"
+		local arg=$archive
 		echo 
 	fi
 
 	# see if the input is a local file (ie a .bashum)
 	if [[ -f "$arg" ]]
 	then
-		local project_file=$(bashum_file_extract_project_file "$arg")
-		local executables=( $(bashum_file_get_executables "$arg") )
-		local libs=( $(bashum_file_get_libs "$arg") )
+		local project_file=$(archive_extract_project_file "$arg")
+		local executables=( $(archive_get_executables "$arg") )
+		local libs=( $(archive_get_libs "$arg") )
 
 	# see if the input is an installed package
 	elif [[ -d "$bashum_repo/packages/$arg" ]]

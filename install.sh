@@ -33,23 +33,23 @@ then
 	exit 1
 fi
 
-bashum_file_tmp=${bashum_file_tmp:-/tmp/bashum.tar}
-bashum_file_remote=${bashum_file_remote:-"https://github.com/pkopriv2/bashum_repo/raw/master/bashum-$version.tar"}
+archive_tmp=${bashum_file_tmp:-/tmp/bashum.tar}
+archive_remote=${bashum_file_remote:-"https://github.com/pkopriv2/bashum_repo/raw/master/bashum-$version.tar"}
 
-console_info "Attempting to download bashum file: $bashum_file_remote"
+console_info "Attempting to download bashum file: $archive_remote"
 if command -v curl &> /dev/null
 then
-	if ! curl -L $bashum_file_remote > $bashum_file_tmp
+	if ! curl -L $archive_remote > $bashum_file_tmp
 	then
-		console_error "Error downloading: $bashum_file_remote.  Either cannot download or cannot write to file: $bashum_file_tmp"
+		console_error "Error downloading: $archive_remote.  Either cannot download or cannot write to file: $bashum_file_tmp"
 		exit 1
 	fi
 
 elif command -v wget &> /dev/null
 then
-	if ! wget -q -O $bashum_file_tmp $bashum_file_remote
+	if ! wget -q -O $archive_tmp $bashum_file_remote
 	then
-		console_error "Error downloading: $bashum_file_remote.  Either cannot download or cannot write to file: $bashum_file_tmp"
+		console_error "Error downloading: $archive_remote.  Either cannot download or cannot write to file: $bashum_file_tmp"
 		exit 1
 	fi
 
@@ -58,11 +58,16 @@ else
 	exit 1
 fi
 
+console_info "Cleaning up old bashum files."
+if [[ -d ~/.bashum ]]
+then
+	rm -rf ~/.bashum 
+fi
 
 console_info "Installing bashum."
-if ! tar -xf $bashum_file_tmp -C ~
+if ! tar -xf $archive_tmp -C ~
 then
-	console_error "Error unpackaging tmp file [$bashum_file_tmp]"
+	console_error "Error unpackaging tmp file [$archive_tmp]"
 	exit 1
 fi 
 

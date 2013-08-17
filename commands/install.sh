@@ -3,24 +3,13 @@
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
 
-require 'lib/console.sh'
-require 'lib/string.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
-require 'lib/package.sh'
-require 'lib/project_file.sh'
-require 'lib/bashum_file.sh'
-require 'lib/download.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
 
-require 'lib/bashum/remote.sh'
-
-if ! command -v git &> /dev/null
-then
-	fail "git cannot be found."
-fi
+require 'lib/bashum/install.sh'
 
 install_usage() {
-	echo "$bashum_cmd install <package> [options]"
+	echo "$bashum_cmd install [<package>|<file>|<url>] [option]*"
 }
 
 install_help() {
@@ -34,8 +23,10 @@ install_help() {
 	printf '%s' '
 	Validates and installs the the specified bashum file to the local
 	bashum repo ($bashum_repo).  In order to pass validation,
-	the bashum file must have the proper strucutre as described by
-	its project.sh file and all the dependencies must be satisfied.
+	the bashum file must have the proper structure as described by
+	its project.sh file.  
+
+	Dependencies will be automatically detected and
 
 	Note: <package> can be a local file or a url.  
 
@@ -57,32 +48,37 @@ install() {
 		echo
 	}
 
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		install_help "$@"
 		exit $?
 	fi
 
-	if (( $# < 1 )) 
+	if (( $# == 0 )) 
 	then
-		error "Incorrect number of arguments"
-		usage
-		exit 1
+		install_from_project $(pwd)
+
+		info "Successfully installed package from project."
+		return 0
 	fi
 
 	if is_url $1
 	then
 		install_from_url $1
-		return $?
+
+		info "Successfully installed package from url [$1]"
+		return 0
 	fi
 
 	if [[ -f $1 ]]
 	then
 		install_from_file $1
-		return $?
+
+		info "Successfully installed package from file [$1]"
+		return 0
 	fi
 
-	local expression=$1; shift
+	local package=$1; shift
 	while (( $# > 0 ))
 	do
 		case "$1" in
@@ -103,8 +99,8 @@ install() {
 		shift
 	done
 
-	install_from_name $expression $version 
-	return $?
+	install_from_remote $package $version
+	info "Successfully installed package from remote repo [$package${version:+:$version}]"
 }
 
 # usage: is_url <expression>
@@ -115,125 +111,4 @@ is_url() {
 	fi
 
 	echo $1 | grep -q '$http'; return $?
-}
-
-
-# usage: install_from_name <name> [<version>]
-install_from_name() {
-	if (( $# != 1 )) && (( $# != 2 ))
-	then
-		fail 'usage: install_from_name <name> [<version>]'
-	fi
-
-	if package_is_installed $1 $2
-	then
-		error "Package [$1] is already installed with version [>= ${2:-any}]"
-		exit 1
-	fi
-
-	remote_repos_ensure_all
-
-	local file=$(remote_bashum_from_name $1 $2)
-	if [[ -z $file ]] || [[ ! -f $file ]]
-	then
-		error "Unable to locate bashum with that name [$1] and version [${2:-any}]"
-		exit 1
-	fi
-
-	if ! install_from_file $file 
-	then
-		fail "Error installing bashum [$file]"
-	fi
-}
-
-# usage: install_from_url <url>
-install_from_url() {
-	if (( $# != 1 ))
-	then
-		fail 'usage: install_from_url <url>'
-	fi
-
-	local target_file=$bashum_tmp_dir/$(str_random) 
-	if ! download "$1" "$target_file"
-	then
-		fail "Error downloading bashum [$1] to [$target_file]"
-	fi
-
-	if ! install_from_file $target_file 
-	then
-		fail "Error installing bashum [$target_file]"
-	fi
-}
-
-# usage: install_from_file <file>
-install_from_file() {
-	if (( $# != 1 ))
-	then
-		fail 'usage: install_from_file <file> '
-	fi
-
-	if [[ ! -f $1 ]]
-	then
-		fail "That file [$1] does not exist"
-	fi
-
-	if ! bashum_file_is_installable "$1"
-	then
-		error "Error validating bashum [$1]"
-		exit 1
-	fi
-
-	local project_file=$(bashum_file_extract_project_file "$1")
-	if ! install_dependencies $project_file
-	then
-		error "Error installing dependencies"
-		exit 1
-	fi
-
-	local name=$(project_file_get_name $project_file)
-	echo "Installing bashum [$name]"
-
-	if package_is_installed $name 
-	then
-		if ! package_remove $name
-		then
-			error "Error removing previously installed package."
-			exit 1
-		fi
-	fi
-
-	tar -xf "$1" -C $bashum_repo/packages 
-	if ! package_generate_executables "$name"
-	then
-		error "Error generating package executables: $name"
-		exit 1
-	fi
-
-	info "Successfully installed package: $name" 
-	echo "Please re-source your environment (open a new terminal session)." 
-}
-
-# usage: install_dependencies <project_file>
-install_dependencies() {
-	if (( $# != 1 ))
-	then
-		fail 'usage: install_dependencies <project_file>'
-	fi
-
-	# validate the dependencies (try to install them if they're not already installed)
-	local dependencies=( $(project_file_get_dependencies $1) )
-	for dependency in "${dependencies[@]}"
-	do 
-		local dep_name=${dependency%%:*}
-		local dep_version=${dependency##*:}
-
-		if ! package_is_installed $dep_name $dep_version
-		then
-			if ! install $dep_name --version $dep_version
-			then
-				echo "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
-				return 1
-			fi
-		fi
-	done
 }

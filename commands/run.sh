@@ -5,10 +5,12 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_path=${bashum_path:-"$bashum_home:$bashum_repo/packages"}
 export bashum_project_file=${bashum_project_file:-"project.sh"}
 
-require 'lib/console.sh'
-require 'lib/help.sh'
-require 'lib/project_file.sh'
-require 'lib/package.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
+
+require 'lib/bashum/project_file.sh'
+require 'lib/bashum/package.sh'
+require 'lib/bashum/install.sh'
 
 run_usage() {
 	echo "$bashum_cmd run <command> [options]"
@@ -37,12 +39,11 @@ run_help() {
 }
 
 run() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		run_help "$@"
 		exit $?
 	fi
-
 
 	local project_file=$bashum_project_file 
 	if [[ ! -f $project_file ]]
@@ -69,20 +70,7 @@ run() {
 		exit 1
 	fi
 
-	local dependencies=( $(project_file_get_dependencies $project_file) )
-
-	declare local dependency
-	for dependency in "${dependencies[@]}"
-	do 
-		local dep_name=${dependency%%:*}
-		local dep_version=${dependency##*:}
-
-		if ! package_is_installed $dep_name $dep_version
-		then
-			error "Missing dependency: [$dep_name${dep_version:+:$dep_version}]"
-			exit 1
-		fi
-	done
+	install_dependencies $project_file
 
 	local cwd=$(pwd)
 	export PATH=$cwd/bin:$PATH

@@ -1,10 +1,10 @@
 #! /usr/bin/env bash
 
+require 'lib/bashum/lang/fail.sh'
+
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_remote_home=${bashum_remote_home:-$bashum_repo/cache}
 export bashum_remote_urls_file=${bashum_remote_urls_file:-$bashum_remote_home/.repos}
-
-require 'lib/fail.sh'
 
 [[ -d $bashum_remote_home ]]      || mkdir -p $bashum_remote_home
 [[ -f $bashum_remote_urls_file ]] || echo "https://github.com/pkopriv2/bashum_repo.git" >> $bashum_remote_urls_file
@@ -291,3 +291,4 @@ remote_bashum_from_name() {
 
 	echo $max
 }
+

@@ -19,13 +19,13 @@ console_error() {
 }
 
 
-if [[ ! -f project.txt ]]
+if [[ ! -f version.txt ]]
 then
 	console_error "Must be in the root of the project directory."
 	exit 1
 fi
 
-version=$(cat project.txt | awk '{print $2;}')
+version=$(cat version.txt)
 while [[ $# -gt 0 ]]
 do
 	arg="$1"
@@ -53,7 +53,7 @@ fi
 mkdir -p $staging_dir
 
 # copy the files into the staging directory
-files=( "bin" "lib" "env" "env.sh" "commands" )
+files=( "bin" "lib" "env" "env.sh" "commands" "version.txt" )
 for file in ${files[@]}
 do
 	if ! cp -r $file $staging_dir

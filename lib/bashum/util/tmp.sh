@@ -1,6 +1,6 @@
 # /usr/bin/env bash
 
-require 'lib/string.sh' 
+require 'lib/bashum/lang/string.sh' 
 
 export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum_$(str_random)}
 

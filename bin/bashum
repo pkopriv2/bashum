@@ -8,12 +8,16 @@ source $bashum_home/lib/require.sh
 set -o errexit 
 set -o errtrace 
 
-require 'lib/tmp.sh' # for passivity
-require 'lib/command.sh'
-require 'lib/console.sh'
-require 'lib/string.sh'
+require 'lib/fail.sh'
+
+require 'lib/bashum/cli/command.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/cli/options.sh'
+
+require 'lib/bashum/util/tmp.sh' # for passivity
 
 require 'commands/help.sh'
+require 'commands/version.sh'
 
 # if no args are provided, then go to the help menu
 if (( $# == 0 ))
@@ -23,21 +27,22 @@ then
 fi
 
 # see if the user was aiming for help
-case "$1" in
-	help|-h|--help)
-		shift
+if options_is_help $@
+then
+	shift 
 
-		help "$@"
-		exit $?
-		;;
-	#version|-v|--version)
-		#shift
+	help "$@"
+	exit $?
+fi
 
-		#version "$@"
-		#exit $?
-		#;;
-esac
+# see if the user was aiming for the version
+if options_is_version $@ 
+then
+	shift
 
+	version "$@" 
+	exit $?
+fi
 
 # try to get the command
 if ! cmd_tuple=( $(command_get_from_args "$@" ) ) 

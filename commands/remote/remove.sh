@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
-require 'lib/fail.sh'
-require 'lib/help.sh'
+require 'lib/bashum/cli/console.sh'
+require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/cli/options.sh'
 require 'lib/bashum/remote.sh'
 
 remote_remove_usage() {
@@ -30,7 +30,7 @@ remote_remove_help() {
 }
 
 remote_remove() {
-	if help? "$@" 
+	if options_is_help "$@" 
 	then
 		remote_remove_help "$@"
 		exit $?

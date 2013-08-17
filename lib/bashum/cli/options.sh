@@ -1,8 +1,6 @@
 #! /usr/bin/env bash
 
-# This is retained for passivity ONLY!! TODO: remove in a future release!
-
-help_detailed?() {
+options_is_detailed_help() {
 	if (( $# == 0 )) 
 	then
 		return 1
@@ -23,9 +21,29 @@ help_detailed?() {
 	return 1
 }
 
-help?() {
+options_is_help() {
 	case "$1" in
 		-h|--help|help)
+			return 0
+			;;
+	esac
+
+	return 1
+}
+
+options_is_usage() {
+	case "$1" in
+		-u|--usage|usage)
+			return 0
+			;;
+	esac
+
+	return 1
+}
+
+options_is_version() {
+	case "$1" in
+		-v|--version|version)
 			return 0
 			;;
 	esac

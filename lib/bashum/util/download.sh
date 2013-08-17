@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-require 'lib/console.sh'
+require 'lib/bashum/cli/console.sh'
 
 # downloads a remote resource to the specified location.
 download() {
