@@ -1,18 +1,38 @@
 # Bashum 
 
-Finally, a package manager for bash, written in bash!  Bashum provides
-support for building, installing and managing .bashums
+Finally, a package manager for bash - written in bash!  But it's much more
+than a simple package manager.  Bashum is a complete development ecosystem 
+for bash code. 
 
+Bashum provides a single 'require' function that allows bash developers to 
+freely modularize and organize their code.  This seemingly tiny feature 
+frees bash developers from the confinges of monolithic scripts and brings 
+bash up to par with other scripting languages.  Just require a file 
+that file's functionsare available to you.
+
+Bashum allows developers to build on the works of others by allowing
+dependencies between projects.  Bashums are to bash what gems are to ruby.
+Simply add a dependency on another project and all that project's files 
+are available to develop against!
+
+For those who aren't all that interested in developing bash code, you can
+still use bashum to use bash code!  I love writing bash tools and love 
+giving them away.  Feel free to use bashum to install some of my stuff 
+and let me know how things are working!
 
 # Commands
 
-* *build*   - Assembles the bashum project in the current working directory.
-* *install* - Installs a bashum to the local bashum repo.
-* *list*    - Lists the currently installed bashums.
-* *show*    - Shows a detailed view of a bashum pacage, a .bashum file or a remote file.
-* *remove*  - Uninstalls a bashum file.
-* *run*     - Runs an executable under the current bashum project.
-* *test*    - Runs a subset of tests for the project.
+* *build*         - Assembles the bashum project in the current working directory.
+* *install*       - Installs a bashum to the local bashum repo.
+* *list*          - Lists the currently installed bashums.
+* *remove*        - Uninstalls a bashum file.
+* *remote add*    - Adds a repo to the list of remote repositories.
+* *remote remove* - Removes a repo from the list of remote repositories.
+* *remote list*   - Lists all the remote repositories.
+* *run*           - Runs an executable under the current bashum project.
+* *search*        - Searches the list of remote repositories for bashums to install.
+* *show*          - Shows a detailed view of a bashum pacage, a .bashum file or a remote file.
+* *test*          - Runs a subset of tests for the project.
 
 # Dependencies
 
@@ -76,6 +96,27 @@ Windows:
 
 Resource your bash environment.  Usually, just start a new terminal session.
 
+# Installing Bashums
+
+With the latest releast of bashum, installing packages has become incredibly easy.  To search for a
+list of bashums to install, simply type: 
+	
+	bashum search <expression>
+
+The search expressions are simply grep expressions - so feel free to use those regular expressions!
+Once you have found a bashum to install, type: 
+
+	bashum install <package> [--version <optional_version>]
+
+And that's it! 
+
+By default, bashum is configured with a single remote repository (https://github.com/pkopriv2/bashum\_repo).
+You may add as many repositories as you'd like by using:
+
+	bashum remote add <url>
+
+A bashum repository is nothing but a git repo, so feel free to make your own!
+
 # Building a Bashum Project 
 
 The standard set of bashum files are those that are assembled by default when building a bashum project:
@@ -131,3 +172,20 @@ Given the following project:
 	
 	require 'lib/lib.sh'       # imports the lib.sh in this project.	
 	require 'lib/console.sh'   # imports the stdlib console. 
+
+
+## Copyright
+
+Copyright 2013 Preston Koprivica (pkopriv2@gmail.com)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
