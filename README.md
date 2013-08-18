@@ -2,18 +2,7 @@
 
 Finally, a package manager for bash - written in bash!  But it's much more
 than a simple package manager.  Bashum is a complete development ecosystem 
-for bash code. 
-
-Bashum provides a single 'require' function that allows bash developers to 
-freely modularize and organize their code.  This seemingly tiny feature 
-frees bash developers from the confinges of monolithic scripts and brings 
-bash up to par with other scripting languages.  Just require a file 
-that file's functionsare available to you.
-
-Bashum allows developers to build on the works of others by allowing
-dependencies between projects.  Bashums are to bash what gems are to ruby.
-Simply add a dependency on another project and all that project's files 
-are available to develop against!
+for bash. 
 
 For those who aren't all that interested in developing bash code, you can
 still use bashum to use bash code!  I love writing bash tools and love 
