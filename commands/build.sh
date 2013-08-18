@@ -20,13 +20,14 @@ build_help() {
 
 	bold 'DESCRIPTION'
 	printf '%s' '
-	Builds the project in the current working directory.
+	Builds the project in the current working directory and outputs 
+	the resulting bashum into target/<name>-<version>.bashum
 
 '
 
 	bold 'OPTIONS'
 	printf '%s' '
-	- None currently supported.  
+	- None 
 
 '
 

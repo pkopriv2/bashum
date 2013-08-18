@@ -21,19 +21,27 @@ install_help() {
 
 	bold 'DESCRIPTION'
 	printf '%s' '
-	Validates and installs the the specified bashum file to the local
-	bashum repo ($bashum_repo).  In order to pass validation,
-	the bashum file must have the proper structure as described by
-	its project.sh file.  
+	Installs the specified package.  The package may be a raw bashum
+	file, a url to a bashum file, or the name (and optional version) 
+	of a package hosted in a remote repository. 
 
-	Dependencies will be automatically detected and installed.
+	If this is invoked at the root of a project with no arguments, 
+	the project will be built and installed. 
+
+	Dependencies will be automatically detected and installed from
+	the list of remote repositories.  
+
+	For the complete list of repositories that will be searched, 
+	use the command:
+	  
+	    bashum remote list
 
 '
 
 	bold 'OPTIONS'
 	printf '%s' '
-	-v|--version            The version of the package to install,
-	                        if installing from a remote repository.
+	-v|--version    The version of the package to install, if installing 
+	                from a remote repository.
 
 '
 }

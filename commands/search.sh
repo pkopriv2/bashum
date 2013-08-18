@@ -21,6 +21,10 @@ search_help() {
 	Searches the remote repository for bashums matching the given expressions.  
 	Search expressions should be in a form compatible with grep. 
 
+	For a list of the repositories that will be searched, use the command: 
+	
+	    bashum remote list 
+
 '
 
 	bold 'OPTIONS'
