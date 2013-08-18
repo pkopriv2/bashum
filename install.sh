@@ -39,7 +39,7 @@ archive_remote=${bashum_file_remote:-"https://github.com/pkopriv2/bashum_repo/ra
 console_info "Attempting to download bashum file: $archive_remote"
 if command -v curl &> /dev/null
 then
-	if ! curl -L $archive_remote > $bashum_file_tmp
+	if ! curl -L $archive_remote > $archive_tmp
 	then
 		console_error "Error downloading: $archive_remote.  Either cannot download or cannot write to file: $bashum_file_tmp"
 		exit 1
