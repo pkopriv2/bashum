@@ -279,29 +279,29 @@ project_file_print() {
 		echo
 	fi
 
-	# print the executables
-	if (( ${#executables[@]} > 0 ))
-	then
-		info "Executables: " 
-		declare local file
-		for file in "${executables[@]}" 
-		do
-			echo "    - $(basename $file)"
-		done
-		echo 
-	fi
+	## print the executables
+	#if (( ${#executables[@]} > 0 ))
+	#then
+		#info "Executables: " 
+		#declare local file
+		#for file in "${executables[@]}" 
+		#do
+			#echo "    - $(basename $file)"
+		#done
+		#echo 
+	#fi
 
-	# print the library files
-	if (( ${#libs[@]} > 0 ))
-	then
-		info "Libraries: " 
-		declare local file
-		for file in "${libs[@]}" 
-		do
-			echo "    - ${file##*$name}"
-		done
-		echo 
-	fi
+	## print the library files
+	#if (( ${#libs[@]} > 0 ))
+	#then
+		#info "Libraries: " 
+		#declare local file
+		#for file in "${libs[@]}" 
+		#do
+			#echo "    - ${file##*$name}"
+		#done
+		#echo 
+	#fi
 
 	if (( "${#file_globs}" > 0 ))
 	then

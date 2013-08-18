@@ -1,6 +1,6 @@
 # lib/bashum/archive.sh
 
-require 'lib/bashum/package.sh'
+require 'lib/bashum/repo.sh'
 require 'lib/bashum/project_file.sh'
 
 require 'lib/bashum/cli/console.sh'
@@ -77,7 +77,7 @@ archive_get_libs() {
 		exit 1
 	fi
 	
-	tar -tf $archive | grep '^[^/]*/lib/.' 
+	tar -tf $archive | grep '^[^/]*/lib/.' | grep '\.sh$'
 }
 
 # usage: archive_is_installable <file>
@@ -225,7 +225,7 @@ archive_install() {
 		local dep_name=${dependency%%:*}
 		local dep_version=${dependency##*:}
 
-		if ! package_is_installed $dep_name $dep_version
+		if ! repo_package_is_installed $dep_name $dep_version
 		then
 			fail "Missing dependency [$dep_name:$dep_version]"
 		fi
@@ -235,17 +235,17 @@ archive_install() {
 
 	# cleanup any existing package with this project's name
 	# TODO: should we prevent re-installing an existing package?
-	if package_is_installed $name 
+	if repo_package_is_installed $name 
 	then
-		if ! package_remove $name
+		if ! repo_package_remove $name
 		then
 			fail "Error removing package [$name]" 
 		fi
 	fi
 
 	# okay, we should be good to install!
-	tar -xf "$1" -C $(package_repo_get_package_root) 
-	if ! package_generate_executables "$name"
+	tar -xf "$1" -C $(repo_get_package_root) 
+	if ! repo_package_generate_executables "$name"
 	then
 		fail "Error generating package executables: $name"
 	fi

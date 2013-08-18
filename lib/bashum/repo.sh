@@ -11,7 +11,7 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 [[ -d $bashum_repo/bin ]]      || mkdir -p $bashum_repo/bin
 
 # usage: package_repo_get_package_root
-package_repo_get_package_root() {
+repo_get_package_root() {
 	if (( $# != 0 ))
 	then
 		fail 'usage: package_get_root'
@@ -21,7 +21,7 @@ package_repo_get_package_root() {
 }
 
 # usage: package_repo_get_bin_root
-package_repo_get_bin_root() {
+repo_get_bin_root() {
 	if (( $# != 0 ))
 	then
 		fail 'usage: package_repo_get_bin_root'
@@ -30,11 +30,25 @@ package_repo_get_bin_root() {
 	echo $bashum_repo/bin
 }
 
-# usage: package_get_home <name>
-package_get_home() {
-	if (( $# == 0 ))
+# usage: package_get_all
+repo_package_get_all() {
+	if (( $# != 0 ))
 	then
-		fail 'Usage: package_get_home <name>'
+		fail 'usage: package_get_all'
+	fi
+
+	local dirs=( $( builtin cd $bashum_repo/packages; find $(pwd) -mindepth 1 -maxdepth 1 -type d ) )
+	for dir in "${dirs[@]}"
+	do
+		echo $(basename $dir)
+	done
+}
+
+# usage: repo_package_get_home <name>
+repo_package_get_home() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: repo_package_get_home <name>'
 	fi
 
 	if [[ -z $1 ]]
@@ -42,17 +56,27 @@ package_get_home() {
 		fail 'Must provide a project name.'
 	fi
 
-	echo "$bashum_repo/packages/$1"
+	echo "$(repo_get_package_root)/$1"
 }
 
-# usage: package_is_installed <name> [<version>]
-package_is_installed() {
+# usage: repo_package_get_project_file <name>
+repo_package_get_project_file() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: repo_package_get_home <name>'
+	fi
+
+	echo "$(repo_package_get_home $1)/project.sh"
+}
+
+# usage: repo_package_is_installed <name> [<version>]
+repo_package_is_installed() {
 	if (( $# < 1 )) || (( $# > 2 ))
 	then
-		fail 'Usage: package_is_installed <name>'
+		fail 'Usage: repo_package_is_installed <name>'
 	fi
 	
-	local package_home=$(package_get_home $1)
+	local package_home=$(repo_package_get_home $1)
 	if [[ ! -d $package_home ]] 
 	then
 		return 1
@@ -90,14 +114,14 @@ package_is_installed() {
 	[[ "$version" > "$2" ]] || [[ "$version" == "$2" ]]; return $?
 }
 
-# usage: package_get_dependers <name>
-package_get_dependers() {
+# usage: repo_package_get_dependers <name>
+repo_package_get_dependers() {
 	if (( $# != 1 ))
 	then
-		fail 'usage: package_get_dependers <name>'
+		fail 'usage: repo_package_get_dependers <name>'
 	fi
 
-	local package_home=$(package_get_home $1)
+	local package_home=$(repo_package_get_home $1)
 	if [[ ! -d $package_home ]]
 	then
 		fail "Package [$1] is not installed."
@@ -160,14 +184,14 @@ package_get_dependers() {
 	) || exit 1 
 }
 
-# usage: package_get_executables <name>
-package_get_executables() {
+# usage: repo_package_get_executables <name>
+repo_package_get_executables() {
 	if [[ -z $1 ]]
 	then
 		fail 'Must provide a project name.'
 	fi
 
-	local package_home=$(package_get_home "$1")
+	local package_home=$(repo_package_get_home "$1")
 	if [[ ! -d $package_home ]] 
 	then
 		error "Package [$1] is not installed."
@@ -189,13 +213,13 @@ package_get_executables() {
 	done
 }
 
-package_get_libs() {
+repo_package_get_libs() {
 	if [[ -z $1 ]]
 	then
 		fail 'Must provide a project name.'
 	fi
 
-	local package_home=$(package_get_home "$1")
+	local package_home=$(repo_package_get_home "$1")
 	if [[ ! -d $package_home ]] 
 	then
 		error "Package [$1] is not installed."
@@ -211,14 +235,14 @@ package_get_libs() {
 	find $lib_dir -name '*.sh' 
 }
 
-package_generate_executables() {
+repo_package_generate_executables() {
 	if [[ -z $1 ]]
 	then
 		fail 'Must provide a project name'
 	fi
 
 	local name="$1"
-	for executable in $(package_get_executables "$name" ) 
+	for executable in $(repo_package_get_executables "$name" ) 
 	do
 		# grab the executable name
 		local base_name=$(basename $executable) 
@@ -255,14 +279,14 @@ package_generate_executables() {
 	done
 }
 
-package_remove_executables() {
+repo_repo_package_remove_executables() {
 	if [[ -z $1 ]]
 	then
 		fail 'Must provide a package name'
 	fi
 
 	local name="$1"
-	for executable in $(package_get_executables "$name" ) 
+	for executable in $(repo_package_get_executables "$name" ) 
 	do
 		# grab the executable package_name 
 		local base_name=$(basename $executable) 
@@ -291,24 +315,24 @@ package_remove_executables() {
 	done
 }
 
-# usage: package_remove <name>
-package_remove() {
+# usage: repo_package_remove <name>
+repo_package_remove() {
 	if (( $# != 1 ))
 	then
-		fail 'usage: package_remove <name>'
+		fail 'usage: repo_package_remove <name>'
 	fi
 
-	if ! package_is_installed $1 
+	if ! repo_package_is_installed $1 
 	then
 		fail "Package is not installed [$1]"
 	fi
 
-	if ! package_remove_executables "$1"
+	if ! repo_repo_package_remove_executables "$1"
 	then
 		fail "Error removing executables for package [$1]"
 	fi
 
-	local package_home=$(package_get_home $1)
+	local package_home=$(repo_package_get_home $1)
 	if ! rm -r $package_home
 	then
 		fail "Error deleting package: $package_home"

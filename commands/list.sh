@@ -4,8 +4,9 @@ export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 
 require 'lib/bashum/cli/console.sh'
-require 'lib/bashum/project_file.sh'
 require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/repo.sh'
+require 'lib/bashum/project_file.sh'
 
 list_usage() {
 	echo "$bashum_cmd list [options]"
@@ -26,7 +27,7 @@ list_help() {
 
 	bold 'OPTIONS'
 	printf '%s' '
-	-d|--detailed    Prints the descriptions of the bashums.
+	-None
 
 '
 } 
@@ -39,25 +40,15 @@ list() {
 		exit $?
 	fi
 
-	local detailed=false
-	while [[ $# -gt 0 ]]
-	do
-		arg="$1"
-		shift
-
-		case "$arg" in
-			-d|--detailed)
-				detailed=true
-				;;
-		esac
-	done
-	
 	info "Installed Bashums: "
 	echo
 
 
-	for project_file in $(ls $bashum_repo/packages/*/project.sh 2>/dev/null)
+	local packages=( $(repo_package_get_all) )
+	for package in "${packages[@]}"
 	do
+		local project_file=$(repo_package_get_project_file $package)
+
 		project_file_api 
 
 		local name=""
@@ -80,27 +71,10 @@ list() {
 			version=$1
 		}
 
-		local description=""
-		description() {
-			if (( $# != 1 ))
-			then
-				fail "Usage: description <description>"
-			fi
-
-			description=$1
-		}
 
 		source $project_file
 		project_file_api_unset
 
-		printf "\t- %s" "$name [$version]" 
-
-		if [[ -n $description ]] && $detailed
-		then
-			echo " - $description"
-		else 
-			echo
-		fi
+		printf '%-30s[%s]\n' "$name" "$version"
 	done
-		
 }

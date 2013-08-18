@@ -6,7 +6,7 @@ require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/lang/fail.sh'
 require 'lib/bashum/cli/options.sh'
 require 'lib/bashum/project_file.sh'
-require 'lib/bashum/package.sh'
+require 'lib/bashum/repo.sh'
 
 remove_usage() {
 	echo "$bashum_cmd remove <package> [options]"
@@ -51,7 +51,7 @@ remove() {
 		exit 1
 	fi
 
-	if ! package_is_installed $1 
+	if ! repo_package_is_installed $1 
 	then
 		error "That package [$1] is not installed"
 		exit 1
@@ -68,13 +68,13 @@ remove() {
 
 	# TODO: Enhance to remove unneeded dependencies.
 
-	local dependers=( $(package_get_dependers "$1") )
+	local dependers=( $(repo_package_get_dependers "$1") )
 	if (( ${#dependers[@]} > 0 ))
 	then
 		error "Cannot remove package [$1]. It is depended upon by: ( ${dependers[@]} )"
 		exit 1
 	fi
 
-	package_remove $1
+	repo_package_remove $1
 	info "Successfully removed: $1"
 }

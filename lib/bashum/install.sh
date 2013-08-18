@@ -1,4 +1,4 @@
-require 'lib/bashum/package.sh'
+require 'lib/bashum/repo.sh'
 require 'lib/bashum/archive.sh'
 require 'lib/bashum/project_file.sh'
 require 'lib/bashum/remote.sh'
@@ -12,7 +12,7 @@ install_from_remote() {
 		fail 'usage: remote_bashum_install <name> [<version>]'
 	fi
 
-	if package_is_installed $1 $2
+	if repo_package_is_installed $1 $2
 	then
 		fail "Package [$1] is already installed with version [>= ${2:-any}]"
 	fi
@@ -103,7 +103,7 @@ install_dependencies() {
 		local dep_name=${dependency%%:*}
 		local dep_version=${dependency##*:}
 
-		if package_is_installed $dep_name $dep_version
+		if repo_package_is_installed $dep_name $dep_version
 		then
 			continue
 		fi

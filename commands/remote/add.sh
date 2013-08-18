@@ -6,7 +6,7 @@ require 'lib/bashum/lang/fail.sh'
 require 'lib/bashum/remote.sh'
 
 remote_add_usage() {
-	echo "$bashum_cmd remote add <package> [options]"
+	echo "$bashum_cmd remote add <url> [options]"
 }
 
 remote_add_help() {

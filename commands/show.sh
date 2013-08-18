@@ -1,20 +1,16 @@
-#! /usr/bin/env bash
+# commands/show.sh
+
+require 'lib/bashum/repo.sh'
+require 'lib/bashum/show.sh'
+require 'lib/bashum/project_file.sh'
 
 require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/cli/options.sh'
-require 'lib/bashum/lang/string.sh'
+
 require 'lib/bashum/lang/fail.sh'
-require 'lib/bashum/util/download.sh'
-require 'lib/bashum/util/tmp.sh'
-
-require 'lib/bashum/archive.sh'
-require 'lib/bashum/package.sh'
-require 'lib/bashum/project_file.sh'
-
-export bashum_home=${bashum_home:-$HOME/.bashum}
 
 show_usage() {
-	echo "$bashum_cmd show <package> [options]"
+	echo "$bashum_cmd show [<package>|<file>|<url>] [option]*"
 }
 
 show_help() {
@@ -28,7 +24,7 @@ show_help() {
 	printf '%s' '
 	Shows a detailed view of the specified package. The package
 	may be a raw bashum file, an installed bashum, or the url of
-	a remote bashum file.
+	a remote bashum file, or a bashum from a remote repository.
 
 '
 
@@ -40,67 +36,99 @@ show_help() {
 }
 
 
-# Usage: install <package>
-#
-# Installs or updates a package
-#
 show() {
+	usage() {
+		bold 'USAGE'
+
+		echo 
+		printf "\t"; show_usage
+		echo
+	}
+
 	if options_is_help "$@" 
 	then
 		show_help "$@"
 		exit $?
 	fi
 
-	if ! command -v tar &> /dev/null
-	then
-		error "Installation requires a working version of tar." 
-		exit 1
-	fi
-
-	if [[ -z "$1" ]]
+	if (( $# == 0 )) 
 	then
 		error "Must provide a package name."
 		echo 
 
-		echo -n 'USAGE: '; show_usage 
+		usage 
 		exit 1
 	fi
 
-	local arg=$1
-
-	# see if the input is a url
-	if echo $arg | grep -q '^http' 
+	if is_url $1
 	then
-		local archive=$bashum_tmp_dir/$(str_random)
-		download "$arg" "$archive"
-		local arg=$archive
-		echo 
+		show_from_url $1
+		return 0
 	fi
 
-	# see if the input is a local file (ie a .bashum)
-	if [[ -f "$arg" ]]
+	if [[ -f $1 ]]
 	then
-		local project_file=$(archive_extract_project_file "$arg")
-		local executables=( $(archive_get_executables "$arg") )
-		local libs=( $(archive_get_libs "$arg") )
-
-	# see if the input is an installed package
-	elif [[ -d "$bashum_repo/packages/$arg" ]]
-	then
-		local project_file=$bashum_repo/packages/"$arg"/project.sh
-		local executables=( $(package_get_executables "$arg") )
-		local libs=( $(package_get_libs "$arg") )
-	
-	# welp, nothing we can do. 
-	else
-		error "Invalid input.  Must be either a .bashum file, a package name, or the remote url of a bashum file. "
-		echo 
-
-		echo -n 'USAGE: '; show_usage 
-		exit 1
+		show_from_file $1
+		return 0
 	fi
 
-	# print the project file.
-	project_file_print "$project_file"
-	echo 
+	local package=$1; shift
+
+	local remote=false
+	while (( $# > 0 ))
+	do
+		case "$1" in
+			-v|--version)
+				shift
+				local version=$1
+				;;
+			-r|--remote)
+				local remote=true
+				;;
+			-*)
+				error "That option [$1] is not allowed"
+				usage
+				exit 1
+				;;
+			*)
+				error "Positional arguments [$1] are not allowed after options"
+				usage
+				exit 1
+		esac 
+		shift
+	done
+
+	if $remote
+	then
+		show_from_remote $package $version
+		return 0
+	fi
+
+	if repo_package_is_installed $package
+	then
+		if [[ -z $version ]]
+		then
+			show_from_repo $package
+			return 0
+		fi
+
+		local installed_version=$(project_file_get_version $(repo_package_get_project_file $package))
+		if [[ $installed_version == $version ]]
+		then
+			show_from_repo $package
+			return 0
+		fi
+	fi
+
+	show_from_remote $package $version
+}
+
+# usage: is_url <expression>
+is_url() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: is_url <expression>'
+	fi
+
+	echo $1 | grep -q '$http'; return $?
 }

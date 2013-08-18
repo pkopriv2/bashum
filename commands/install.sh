@@ -1,12 +1,12 @@
 #! /usr/bin/env bash
 
-export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
-export bashum_tmp_dir=${bashum_tmp_dir:-/tmp/bashum/}
+require 'lib/bashum/install.sh'
 
 require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/cli/options.sh'
 
-require 'lib/bashum/install.sh'
+require 'lib/bashum/lang/fail.sh'
+
 
 install_usage() {
 	echo "$bashum_cmd install [<package>|<file>|<url>] [option]*"
@@ -26,15 +26,14 @@ install_help() {
 	the bashum file must have the proper structure as described by
 	its project.sh file.  
 
-	Dependencies will be automatically detected and
-
-	Note: <package> can be a local file or a url.  
+	Dependencies will be automatically detected and installed.
 
 '
 
 	bold 'OPTIONS'
 	printf '%s' '
-	-None 
+	-v|--version            The version of the package to install,
+	                        if installing from a remote repository.
 
 '
 }

@@ -53,6 +53,10 @@ search() {
 
 	remote_repos_ensure_all 
 
+	info "Matched bashums:"
+	echo 
+
+	# TODO: think about displaying them differently: [name]     [version1, version2, ...]
 	local bashums=( $(remote_bashums_search $1) )
 	for bashum in ${bashums[@]}
 	do

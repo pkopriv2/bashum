@@ -6,7 +6,7 @@ require 'lib/bashum/cli/options.sh'
 require 'lib/bashum/remote.sh'
 
 remote_list_usage() {
-	echo "$bashum_cmd remote list <package> [options]"
+	echo "$bashum_cmd remote list [options]"
 }
 
 remote_list_help() {

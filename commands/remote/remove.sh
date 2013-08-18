@@ -6,7 +6,7 @@ require 'lib/bashum/cli/options.sh'
 require 'lib/bashum/remote.sh'
 
 remote_remove_usage() {
-	echo "$bashum_cmd remote remove <package> [options]"
+	echo "$bashum_cmd remote remove <url> [options]"
 }
 
 remote_remove_help() {

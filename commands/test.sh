@@ -9,7 +9,7 @@ require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/cli/options.sh'
 
 require 'lib/bashum/project_file.sh'
-require 'lib/bashum/package.sh'
+require 'lib/bashum/repo.sh'
 require 'lib/bashum/install.sh'
 
 test_usage() {
