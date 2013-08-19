@@ -6,8 +6,12 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_remote_home=${bashum_remote_home:-$bashum_repo/cache}
 export bashum_remote_urls_file=${bashum_remote_urls_file:-$bashum_remote_home/.repos}
 
-[[ -d $bashum_remote_home ]]      || mkdir -p $bashum_remote_home
-[[ -f $bashum_remote_urls_file ]] || echo "https://github.com/pkopriv2/bashum_repo.git" >> $bashum_remote_urls_file
+[[ -d $bashum_remote_home ]] || mkdir -p $bashum_remote_home
+
+if ! [[ -f $bashum_remote_urls_file ]] 
+then
+	echo "http://github.com/pkopriv2/bashum-main.git" >> $bashum_remote_urls_file
+fi
 
 # ensure that 'git' is installed 
 if ! command -v git &> /dev/null
@@ -78,7 +82,7 @@ remote_repo_urls_remove() {
 	do
 		if [[ $1 != $url ]]
 		then
-			echo "$1" >> $bashum_remote_urls_file
+			echo "$url" >> $bashum_remote_urls_file
 		fi
 	done
 }
@@ -122,6 +126,26 @@ remote_repo_install() {
 	) || exit 1
 }
 
+# usage: remote_repo_remove <url> 
+remote_repo_remove() {
+	if (( $# != 1 )) 
+	then
+		fail "usage: remote_repo_remove <url>"
+	fi
+
+	if ! remote_repo_is_installed $1
+	then
+		return 0
+	fi
+
+	local target_dir="$(remote_repo_get_home $1)"
+	if ! rm -rf $target_dir 
+	then
+		fail "Failed to remove remote repo [$1]"
+	fi
+}
+
+
 # usage: remote_repo_sync <dir>
 remote_repo_sync() {
 	if (( $# != 1 )) 
@@ -148,18 +172,11 @@ remote_repo_sync() {
 
 # usage: remote_repos_get_all
 remote_repos_get_all() {
-	_IFS=$IFS; IFS=$'\n'
-
-	local dirs=( $(cd $bashum_remote_home; find $(pwd) -mindepth 1 -maxdepth 1 -type d) )
-	for dir in ${dirs[@]}
+	local urls=( $(remote_repo_urls_get_all) )
+	for url in ${urls[@]}
 	do
-		if [[ -d $dir/.git ]]
-		then
-			echo $dir
-		fi
+		echo $(remote_repo_get_home $url)
 	done
-
-	IFS=$_IFS
 }
 
 # usage: remote_repos_sync_all
@@ -191,9 +208,13 @@ remote_repos_ensure_all() {
 
 # usage: remote_bashums_get_all
 remote_bashums_get_all() {
-	(
-		cd $bashum_remote_home; find $(pwd) -maxdepth 2 -type f -name '*.bashum' 
-	)
+	local dirs=( $(remote_repos_get_all) )
+	for dir in ${dirs[@]}
+	do
+		(
+			cd $dir; find $(pwd) -maxdepth 2 -type f -name '*.bashum' 
+		)
+	done
 }
 
 # usage: remote_bashums_search <expression>

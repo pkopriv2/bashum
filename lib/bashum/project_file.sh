@@ -31,6 +31,14 @@ project_file_api() {
 	depends() {
 		:
 	}
+
+	release_repo() {
+		:
+	}
+
+	snapshot_repo() {
+		:
+	}
 }
 
 project_file_api_unset() {
@@ -41,6 +49,8 @@ project_file_api_unset() {
 	unset -f description
 	unset -f file
 	unset -f depends
+	unset -f release_repo
+	unset -f snapshot_repo
 }
 
 project_file_get_name() {
@@ -55,17 +65,27 @@ project_file_get_name() {
 	fi
 
 	project_file_api
+	
+	declare local name 
 	name() {
 		if (( $# != 1 ))
 		then
 			fail "Usage: name <name>"
 		fi
 
-		echo $1
+		name=$1
 	}
 
 	source $1
 	project_file_api_unset
+
+	if [[ -z $name ]]
+	then
+		fail "Project file is missing a name [$1]"
+	fi
+
+	echo $name
+
 }
 
 project_file_get_version() {
@@ -80,17 +100,26 @@ project_file_get_version() {
 	fi
 
 	project_file_api
+
+	declare local version 
 	version() {
 		if (( $# != 1 ))
 		then
 			fail "Usage: version <version>"
 		fi
 
-		echo $1
+		version=$1
 	}
 
 	source $1
 	project_file_api_unset
+
+	if [[ -z $version ]]
+	then
+		fail "Project file is missing a version [$1]"
+	fi
+
+	echo $version
 }
 
 project_file_get_globs() {
@@ -146,6 +175,63 @@ project_file_get_dependencies() {
 
 	source $1
 	project_file_api_unset
+}
+
+# project_file_get_repo <file>
+#
+# returns the appropriate repo for the given version
+# or none, if no repo is available.
+project_file_get_repo() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_repo <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+
+	declare local release_repo
+	release_repo() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: release_repo <url>"
+		fi
+
+		release_repo=$1
+	}
+
+	declare local snapshot_repo
+	snapshot_repo() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: snapshot_repo <url>"
+		fi
+
+		snapshot_repo=$1
+	}
+
+	source $1
+	project_file_api_unset
+
+
+	local version=$(project_file_get_version $1)
+	if [[ $version == *SNAPSHOT* ]]
+	then
+		if [[ -n $snapshot_repo ]]
+		then
+			echo $snapshot_repo
+			return 0
+		fi
+	fi
+
+	if [[ -n $release_repo ]]
+	then
+		echo $release_repo
+	fi
 }
 
 project_file_print() {

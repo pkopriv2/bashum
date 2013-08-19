@@ -55,4 +55,5 @@ remote_remove() {
 	fi
 
 	remote_repo_urls_remove $1
+	remote_repo_remove $1
 }

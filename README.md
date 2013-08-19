@@ -12,6 +12,7 @@ and let me know how things are working!
 # Commands
 
 * *build*         - Assembles the bashum project in the current working directory.
+* *deploy*        - Assembles and deploys the bashum project in the current working directory.
 * *install*       - Installs a bashum to the local bashum repo.
 * *list*          - Lists the currently installed bashums.
 * *remove*        - Uninstalls a bashum file.
@@ -71,6 +72,20 @@ Linux:
 Windows:
 
 	http://www.cygwin.com/ 
+
+## Git 
+
+OSX: 
+	
+	sudo brew install git
+
+Linux:
+	
+	aptitude install git-svn
+
+Windows:
+
+	http://www.cygwin.com/ 
 	
 
 # Installation
@@ -85,7 +100,7 @@ Windows:
 
 Resource your bash environment.  Usually, just start a new terminal session.
 
-# Installing Bashums
+## Installing Bashums
 
 With the latest releast of bashum, installing packages has become incredibly easy.  To search for a
 list of bashums to install, simply type: 
@@ -99,12 +114,24 @@ Once you have found a bashum to install, type:
 
 And that's it! 
 
-By default, bashum is configured with a single remote repository (https://github.com/pkopriv2/bashum\_repo).
+## Remote Repositories
+
+By default, bashum is configured to search and install from a single remote repository 
+(http://github.com/pkopriv2/bashum-main). If you'd like to checkout some tools that are
+still in development:
+
+	bashum remote add http://github.com/pkopriv2/bashum-snapshot.git
+
 You may add as many repositories as you'd like by using:
 
 	bashum remote add <url>
 
-A bashum repository is nothing but a git repo, so feel free to make your own!
+A bashum repository is nothing but a git repo, so feel free to make your own!  The only 
+requirements are that the bashums sit at the root of the repo and they are named
+with the following pattern: *<name>-<version>.bashum*, e.g.:
+
+* /your-awesome-tool-1.0.0.bashum
+* /your-amazing-tool-2.0.0.bashum
 
 # Building a Bashum Project 
 
@@ -120,13 +147,15 @@ The standard set of bashum files are those that are assembled by default when bu
 The project.sh file is the only explicitly required file in a bashum project.  It is a bash-dsl 
 that describes the project.  The following functions are available: 
 
-* *name*         - The name of the project [_required_]
-* *version*      - The version of the project [_required_]
-* *author*       - The name of the author of the project
-* *email*        - The email of the author
-* *description*  - A short description of the project.  Should fit on a single line.
-* *file*         - A 'non-standard' file that should also be assembled (can be a file-glob)
-* *depends*      - Denotes a dependency that this project has on other bashum projects. Takes a name and an optional version. 
+* *name*          - The name of the project [_required_]
+* *version*       - The version of the project [_required_]
+* *author*        - The name of the author of the project
+* *email*         - The email of the author
+* *description*   - A short description of the project.  Should fit on a single line.
+* *file*          - A 'non-standard' file that should also be assembled (can be a file - glob)
+* *depends*       - Denotes a dependency that this project has on other bashum projects. Takes a name and an optional version.
+* *snapshot_repo* - The url of the snapshot remote repository.
+* *release_repo*  - The url of the release remote repository.
 
 Example:
 
@@ -140,6 +169,9 @@ Example:
 
 	depends "stdlib" 
 	depends "other" "1.0.0"
+
+	snapshot_repo "http://github.com/pkopriv2/bashum-snapshot.git"
+	release_repo  "http://github.com/pkopriv2/bashum-main.git"
 
 ## Requiring other files
 

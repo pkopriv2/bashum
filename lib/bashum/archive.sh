@@ -94,7 +94,12 @@ archive_is_installable() {
 	fi
 
 	# ensure that the structure is expected.
-	local name=$(project_file_get_name $project_file)
+	declare local name
+	if ! name=$(project_file_get_name $project_file)
+	then
+		return 1
+	fi
+
 	for file in $(tar -tf $1) 
 	do
 		if ! echo "$file" | grep -q "^$name"
