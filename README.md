@@ -128,7 +128,7 @@ You may add as many repositories as you'd like by using:
 
 A bashum repository is nothing but a git repo, so feel free to make your own!  The only 
 requirements are that the bashums sit at the root of the repo and they are named
-with the following pattern: *<name>-<version>.bashum*, e.g.:
+with the following pattern: *\<name\>-\<version\>.bashum*, e.g.:
 
 * /your-awesome-tool-1.0.0.bashum
 * /your-amazing-tool-2.0.0.bashum
