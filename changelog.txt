@@ -1,0 +1,8 @@
+2.0.0:
+    release_date: 08-19-2013
+    changes: 
+        - Adding support for remote repositories
+		- Adding support for searching remote repositories.
+		- Integrating remote repositories into run, test, install
+		- Adding deploy command
+		- Rewrote basic command logic.
