@@ -412,3 +412,50 @@ project_file_print() {
 		done
 	fi
 }
+
+# usage: project_file_version_compare <version1> <version2>
+#
+# Returns one of three values:
+#   0 - they are equal
+#   1 - version2 is greater
+#  -1 - version1 is greater
+project_file_version_compare() {
+	if (( $# != 2 ))
+	then
+		fail 'usage: project_file_version_compare <version1> <version2>'
+	fi
+
+	if [[ "$1" == "$2" ]]
+	then
+		echo 0; return
+	fi
+
+	local simple_one=$(echo $1 | sed 's|[-\.]SNAPSHOT.*$||')
+	local simple_two=$(echo $2 | sed 's|[-\.]SNAPSHOT.*$||')
+
+	if [[ "$simple_one" > "$simple_two" ]]
+	then
+		echo -1; return
+	fi
+
+	# 2 is a snapshot, 1 is a release
+	if [[ "$2" == *SNAPSHOT* ]] && [[ $1 != *SNAPSHOT* ]]
+	then
+		echo -1; return
+	fi
+
+	# 2 is a release, 1 is a snapshot
+	if [[ "$2" != *SNAPSHOT ]] && [[ $1 == *SNAPSHOT* ]]
+	then
+		echo 1; return
+	fi
+
+	# they're both snapshots, 1 is lexicograpically greater
+	if [[ "$1" > "$2" ]]
+	then
+		echo -1; return
+	fi
+	
+	# 2 is greater
+	echo 1; return
+}

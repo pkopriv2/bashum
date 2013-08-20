@@ -57,6 +57,7 @@ deploy_file() {
 		fail "No deployment repo was found for bashum [$1]" 
 	fi
 
+	echo "Deploying to repo [$remote_repo]"
 	if ! remote_repo_is_installed $remote_repo
 	then
 		remote_repo_install $remote_repo

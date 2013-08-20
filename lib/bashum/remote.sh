@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 require 'lib/bashum/lang/fail.sh'
+require 'lib/bashum/project_file.sh'
 
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_remote_home=${bashum_remote_home:-$bashum_repo/cache}
@@ -299,12 +300,10 @@ remote_bashum_from_name() {
 	local max=${matches[0]}
 	for match in ${matches[@]} 
 	do
-		if [[ $match = *SNAPSHOT* ]]
-		then
-			continue
-		fi
+		local version_match=$(remote_bashum_get_version $match)
+		local version_max=$(remote_bashum_get_version $max)
 
-		if [[ $match > $max ]]
+		if (( "$(project_file_version_compare $version_max $version_match)" > 0 ))
 		then
 			max=$match
 		fi

@@ -95,23 +95,13 @@ repo_package_is_installed() {
 		fail "Package [$1] is missing a project file."
 	fi
 
-	project_file_api
-	local version=""
-	version() {
-		if (( $# != 1 ))
-		then
-			fail "Usage: version <version>"
-		fi
+	declare local version
+	if ! version=$(project_file_get_version $project_file) 
+	then
+		fail "Package [$package_home] is missing version."
+	fi
 
-		version=$1 
-	}
-
-	source $project_file 
-	project_file_api_unset
-
-	# if the version of this project is greater than what was passed in,
-	# then return true. 
-	[[ "$version" > "$2" ]] || [[ "$version" == "$2" ]]; return $?
+	(( "$(project_file_version_compare $version $2)" <= 0 )); return $?
 }
 
 # usage: repo_package_get_dependers <name>
