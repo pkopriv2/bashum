@@ -31,9 +31,8 @@ and let me know how things are working!
 OSX: 
 	
 	sudo brew install bash
-	sudo mv /bin/bash /bin/bash3
-	sudo ln -s /usr/local/bin/bash /usr/bin/bash
-
+	echo "export PATH=/usr/local/bin:\$PATH" >> ~/.profile
+	
 Linux:
 	
 	aptitude install bash
