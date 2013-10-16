@@ -31,8 +31,8 @@ and let me know how things are working!
 OSX: 
 	
 	sudo brew install bash
-        sudo mv /bin/bash /bin/bash3
-        sudo ln -s /usr/local/bin/bash /bin/bash
+	sudo mv /bin/bash /bin/bash3
+	sudo ln -s /usr/local/bin/bash /bin/bash
 	
 Linux:
 	
@@ -47,7 +47,7 @@ Windows:
 
 OSX: 
 	
-	sudo brew install coreutils
+	brew install coreutils
 
 Linux:
 	
@@ -61,7 +61,7 @@ Windows:
 
 OSX: 
 	
-	sudo brew install gnu-tar
+	brew install gnu-tar
 	sudo mv /usr/bin/tar /usr/bin/tar-bsd
 	sudo ln -s /usr/local/bin/gtar /usr/bin/tar
 
@@ -77,7 +77,7 @@ Windows:
 
 OSX: 
 	
-	sudo brew install git
+	brew install git
 
 Linux:
 	
