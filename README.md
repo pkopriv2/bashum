@@ -5,9 +5,9 @@ than a simple package manager.  Bashum is a complete development ecosystem
 for bash. 
 
 For those who aren't all that interested in developing bash code, you can
-still use bashum to use bash code!  I love writing bash tools and love 
+still use bashum to use bash code.  I love writing bash tools and love 
 giving them away.  Feel free to use bashum to install some of my stuff 
-and let me know how things are working!
+and let me know how things are working.
 
 # Commands
 
