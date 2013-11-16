@@ -1,3 +1,8 @@
+2.0.1:
+    release_date: 11-16-2013
+    changes: 
+        - Changing to git:// protocol by default
+		- Changing ownership of files within bashums
 2.0.0:
     release_date: 08-19-2013
     changes: 
