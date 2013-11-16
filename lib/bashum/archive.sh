@@ -195,7 +195,7 @@ archive_build() {
 
 		# build the bashum!
 		builtin cd $staging_parent_dir
-		if ! tar -cf $out $name
+		if ! tar -cf $out $name --owner root --group root
 		then
 			fail "Error building bashum tar" 
 		fi

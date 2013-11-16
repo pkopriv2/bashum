@@ -11,7 +11,7 @@ export bashum_remote_urls_file=${bashum_remote_urls_file:-$bashum_remote_home/.r
 
 if ! [[ -f $bashum_remote_urls_file ]] 
 then
-	echo "http://github.com/pkopriv2/bashum-main.git" >> $bashum_remote_urls_file
+	echo "git://github.com/pkopriv2/bashum-main.git" >> $bashum_remote_urls_file
 fi
 
 # ensure that 'git' is installed 

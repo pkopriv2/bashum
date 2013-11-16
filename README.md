@@ -120,7 +120,7 @@ By default, bashum is configured to search and install from a single remote repo
 (http://github.com/pkopriv2/bashum-main). If you'd like to checkout some tools that are
 still in development:
 
-	bashum remote add http://github.com/pkopriv2/bashum-snapshot.git
+	bashum remote add git://github.com/pkopriv2/bashum-snapshot.git
 
 You may add as many repositories as you'd like by using:
 
