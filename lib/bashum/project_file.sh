@@ -88,6 +88,40 @@ project_file_get_name() {
 
 }
 
+project_file_get_description() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_description <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+	
+	declare local description 
+	description() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: description <description>"
+		fi
+
+		description=$1
+	}
+
+	source $1
+	project_file_api_unset
+
+	if [[ -z $description ]]
+	then
+		fail "Project file is missing a description [$1]"
+	fi
+
+	echo $description
+}
+
 project_file_get_version() {
 	if (( $# != 1 ))
 	then
