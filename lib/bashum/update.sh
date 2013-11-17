@@ -1,3 +1,4 @@
+require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/lang/fail.sh'
 require 'lib/bashum/util/git.sh'
 
@@ -6,9 +7,9 @@ export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_update_frequency=${bashum_update_frequency:-604800}
 export bashum_update_root=${bashum_update_root:-$bashum_repo/updates}
 export bashum_update_repo_url=${bashum_update_repo_url:-"git://github.com/pkopriv2/bashum-versions.git"}
-export bashum_update_last_check_file=${bashum_update_last_check_file:-$bashum_update_root/.last_check}
-export bashum_update_last_update_file=${bashum_update_last_update_file:-$bashum_update_root/.last_update}
 export bashum_update_package=${bashum_update_package:-"bashum-latest.tar"}
+export bashum_update_last_update_file=${bashum_update_last_update_file:-$bashum_update_root/.last_update}
+export bashum_update_last_check_file=${bashum_update_last_check_file:-$bashum_update_root/.last_check}
 
 # ensure that 'git' is installed 
 if ! command -v git &> /dev/null
@@ -20,10 +21,10 @@ fi
 [[ -d $bashum_update_root ]] || mkdir -p $bashum_update_root
 
 # ensure the last check file
-if ! [[ -f $bashum_update_last_check_file ]] 
-then
-    echo $(date +"%s") > $bashum_update_last_check_file
-fi
+[[ -f $bashum_update_last_check_file ]] || echo $(date +"%s") > $bashum_update_last_check_file
+
+# ensure the last update file
+[[ -f $bashum_update_last_update_file ]] || echo 0 > $bashum_update_last_update_file
 
 # usage: bashum_update_get_last_check 
 bashum_update_get_last_check() {
@@ -127,15 +128,18 @@ bashum_auto_update() {
 
     local now=$(date +"%s")
     local last_check=$(bashum_update_get_last_check)
-
+    
     let elapsed=$now-$last_check
     if (( $elapsed < $bashum_update_frequency ))
     then
         return 0
     fi
 
-    echo "Checking for bashum updates"
-    bashum_update_repo_ensure
+    bashum_update_set_last_check $now
+
+    info "[$elapsed] seconds have passed since last check.  Checking for updates"
+
+    bashum_update_repo_ensure > /dev/null
 
     local last_update=$(bashum_update_get_last_update)
     local last_package_time=$(bashum_update_get_package_time)
@@ -146,9 +150,12 @@ bashum_auto_update() {
         return 0
     fi
 
-    echo "Updating bashum."
+    info "Updating bashum."
     bashum_update
+    bashum_update_set_last_update $last_package_time
     echo "Update complete. Please re-source your environment to complete"
+
+    exit 0
 }
 
 bashum_auto_update
