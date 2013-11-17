@@ -27,11 +27,13 @@ require 'lib/fail.sh'
 require 'lib/bashum/cli/command.sh'
 require 'lib/bashum/cli/console.sh'
 require 'lib/bashum/cli/options.sh'
+require 'lib/bashum/update.sh' # auto update
 
 require 'lib/bashum/util/tmp.sh' # for passivity
 
 require 'commands/help.sh'
 require 'commands/version.sh'
+
 
 # if no args are provided, then go to the help menu
 if (( $# == 0 ))

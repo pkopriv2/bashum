@@ -151,7 +151,7 @@ remote_repo_remove() {
 remote_repo_sync() {
 	if (( $# != 1 )) 
 	then
-		fail "usage: remote_repo_sync <url>"
+		fail "usage: remote_repo_sync <dir>"
 	fi
 
 	if [[ ! -d $1 ]]
