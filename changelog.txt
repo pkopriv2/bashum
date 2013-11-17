@@ -1,3 +1,8 @@
+2.1.0:
+    release_date: 11-17-2013
+    changes: 
+		- Auto update elapsed=0 fix
+		- Adding project_file_get_description fn
 2.0.2:
     release_date: 11-17-2013
     changes: 
