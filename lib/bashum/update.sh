@@ -129,7 +129,7 @@ bashum_auto_update() {
     local now=$(date +"%s")
     local last_check=$(bashum_update_get_last_check)
     
-    let elapsed=$now-$last_check
+    let elapsed=$now-$last_check || true
     if (( $elapsed < $bashum_update_frequency ))
     then
         return 0
