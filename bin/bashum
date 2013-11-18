@@ -60,6 +60,9 @@ then
 	exit $?
 fi
 
+# set the separator
+_IFS=$IFS; IFS=$'\n'
+
 # try to get the command
 if ! cmd_tuple=( $(command_get_from_args "$@" ) ) 
 then
@@ -69,6 +72,9 @@ then
 	help 
 	exit 1
 fi
+
+# reset the separator
+IFS=$_IFS
 
 # load the command
 source ${cmd_tuple[0]}
