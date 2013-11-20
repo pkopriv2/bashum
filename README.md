@@ -120,7 +120,7 @@ By default, bashum is configured to search and install from a single remote repo
 (http://github.com/pkopriv2/bashum-main). If you'd like to checkout some tools that are
 still in development:
 
-	bashum remote add git://github.com/pkopriv2/bashum-snapshot.git
+	bashum remote add https://github.com/pkopriv2/bashum-snapshot.git
 
 You may add as many repositories as you'd like by using:
 
@@ -170,9 +170,10 @@ Example:
 	depends "stdlib" 
 	depends "other" "1.0.0"
 
-	snapshot_repo "http://github.com/pkopriv2/bashum-snapshot.git"
-	release_repo  "http://github.com/pkopriv2/bashum-main.git"
-
+	snapshot_repo "git@github.com:pkopriv2/bashum-snapshot.git"
+	release_repo  "git@github.com:pkopriv2/bashum-main.git"
+	
+	
 ## Requiring other files
 
 For the most part, bashum tries to be transparent to the current environment.  Things should just work.  However,
