@@ -1,3 +1,7 @@
+2.1.2:
+    release_date: 11-18-2013
+    changes: 
+		- Changing to https:// protocol by default
 2.1.1:
     release_date: 11-17-2013
     changes: 
