@@ -6,12 +6,13 @@ require 'lib/bashum/project_file.sh'
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_remote_home=${bashum_remote_home:-$bashum_repo/cache}
 export bashum_remote_urls_file=${bashum_remote_urls_file:-$bashum_remote_home/.repos}
+export bashum_remote_url_default=${bashum_remote_url_default:-"https://github.com/pkopriv2/bashum-main.git"}
 
 [[ -d $bashum_remote_home ]] || mkdir -p $bashum_remote_home
 
 if ! [[ -f $bashum_remote_urls_file ]] 
 then
-	echo "git://github.com/pkopriv2/bashum-main.git" >> $bashum_remote_urls_file
+	echo $bashum_remote_url_default >> $bashum_remote_urls_file
 fi
 
 # ensure that 'git' is installed 

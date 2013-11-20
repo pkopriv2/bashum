@@ -6,7 +6,7 @@ export bashum_home=${bashum_home:-$HOME/.bashum}
 export bashum_repo=${bashum_repo:-$HOME/.bashum_repo}
 export bashum_update_frequency=${bashum_update_frequency:-604800}
 export bashum_update_root=${bashum_update_root:-$bashum_repo/updates}
-export bashum_update_repo_url=${bashum_update_repo_url:-"git://github.com/pkopriv2/bashum-versions.git"}
+export bashum_update_repo_url=${bashum_update_repo_url:-"https://github.com/pkopriv2/bashum-versions.git"}
 export bashum_update_package=${bashum_update_package:-"bashum-latest.tar"}
 export bashum_update_last_update_file=${bashum_update_last_update_file:-$bashum_update_root/.last_update}
 export bashum_update_last_check_file=${bashum_update_last_check_file:-$bashum_update_root/.last_check}
@@ -114,8 +114,7 @@ bashum_update() {
     local package_file=$(bashum_update_repo_get_home)/$bashum_update_package
     if ! tar -xf $package_file -C $(dirname $bashum_home)
     then
-        console_error "Error unpackaging update file [$package_file]"
-        exit 1
+        fail "Error unpackaging update file [$package_file]"
     fi 
 }
 
