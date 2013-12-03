@@ -33,10 +33,10 @@ then
 	exit 1
 fi
 
-archive_tmp=${bashum_file_tmp:-/tmp/bashum.tar}
+archive_tmp=${bashum_file_tmp:-/tmp/bashum"$RANDOM".tar}
 archive_remote=${bashum_file_remote:-"https://github.com/pkopriv2/bashum-versions/raw/master/bashum-$version.tar"}
 
-console_info "Attempting to download bashum file: $archive_remote"
+console_info "Attempting to download bashum file [$archive_remote] to [$archive_tmp]"
 if command -v curl &> /dev/null
 then
 	if ! curl -L $archive_remote > $archive_tmp
@@ -65,9 +65,15 @@ then
 fi
 
 console_info "Installing bashum."
-if ! tar -xf $archive_tmp -C ~
+if ! tar -xf $archive_tmp -C ~ 
 then
 	console_error "Error unpackaging tmp file [$archive_tmp]"
+	exit 1
+fi 
+
+if ! rm -f $archive_tmp 
+then
+	console_error "Error removing tmp file [$archive_tmp]"
 	exit 1
 fi 
 
