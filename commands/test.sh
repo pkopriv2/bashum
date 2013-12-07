@@ -50,16 +50,23 @@ test() {
 		exit 1
 	fi
 
+    local test_dir="test"
+    if [[ ! -d $test_dir ]]
+    then
+        echo "No tests found."
+        exit 0
+    fi
+
 	if [[ -n $1 ]]
 	then
 		local test_files=()
 		while (( $# > 0 ))
 		do
-			test_files+=( $(find test -name "$1"_test.sh"" ) )
+			test_files+=( $(find $test_dir -name "$1"_test.sh"" ) )
 			shift 
 		done
 	else
-		local test_files=( $(find test -name '*_test.sh') )
+		local test_files=( $(find $test_dir -name '*_test.sh') )
 	fi
 
 	if (( ${#test_files[@]} == 0 ))
@@ -125,9 +132,6 @@ test() {
 
 					) || {
 						echo "Failed"
-
-						error "Error running test: $fn"
-						exit 1
 					}
 				done
 			) || {

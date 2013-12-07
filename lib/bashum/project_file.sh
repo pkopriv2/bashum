@@ -36,9 +36,19 @@ project_file_api() {
 		:
 	}
 
+	release_site_repo() {
+		:
+	}
+
 	snapshot_repo() {
 		:
 	}
+
+	snapshot_site_repo() {
+		:
+	}
+    
+    
 }
 
 project_file_api_unset() {
@@ -88,6 +98,64 @@ project_file_get_name() {
 
 }
 
+project_file_get_author() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_author <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+	
+	declare local author 
+	author() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: author <author>"
+		fi
+
+		author=$1
+	}
+
+	source $1
+	project_file_api_unset
+
+    echo $author
+}
+
+project_file_get_email() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_email <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+	
+	declare local email 
+	email() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: email <email>"
+		fi
+
+		email=$1
+	}
+
+	source $1
+	project_file_api_unset
+    
+    echo $email
+}
+
 project_file_get_description() {
 	if (( $# != 1 ))
 	then
@@ -107,19 +175,14 @@ project_file_get_description() {
 		then
 			fail "Usage: description <description>"
 		fi
-
+        
 		description=$1
 	}
 
 	source $1
 	project_file_api_unset
 
-	if [[ -z $description ]]
-	then
-		fail "Project file is missing a description [$1]"
-	fi
-
-	echo $description
+    echo $description
 }
 
 project_file_get_version() {
@@ -243,6 +306,63 @@ project_file_get_repo() {
 		if (( $# != 1 ))
 		then
 			fail "Usage: snapshot_repo <url>"
+		fi
+
+		snapshot_repo=$1
+	}
+
+	source $1
+	project_file_api_unset
+
+
+	local version=$(project_file_get_version $1)
+	if [[ $version == *SNAPSHOT* ]]
+	then
+		if [[ -n $snapshot_repo ]]
+		then
+			echo $snapshot_repo
+			return 0
+		fi
+	fi
+
+	if [[ -n $release_repo ]]
+	then
+		echo $release_repo
+	fi
+}
+
+# project_file_get_site_repo <file>
+#
+# returns the appropriate site repo for the given version
+# or none, if no repo is available.
+project_file_get_site_repo() {
+	if (( $# != 1 ))
+	then
+		fail 'usage: project_file_get_repo <file>'
+	fi
+
+	if [[  ! -f "$1" ]]
+	then
+		fail "Input [$1] is not a file."
+	fi
+
+	project_file_api
+
+	declare local release_repo
+	release_site_repo() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: site_release_repo <url>"
+		fi
+
+		release_repo=$1
+	}
+
+	declare local snapshot_repo
+    snapshot_site_repo() {
+		if (( $# != 1 ))
+		then
+			fail "Usage: site_snapshot_repo <url>"
 		fi
 
 		snapshot_repo=$1
