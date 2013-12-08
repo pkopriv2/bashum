@@ -12,11 +12,6 @@ export bashum_site_root=${bashum_site_root:-$bashum_repo/sites}
 # make sure the root directory is there
 [[ -d $bashum_site_root ]] || mkdir -p $bashum_site_root
 
-# ensure that 'git' is installed 
-if ! command -v git &> /dev/null
-then
-	fail "git is required."
-fi
 
 
 # usage: bashum_site_repo_get_home <url> 
@@ -48,24 +43,24 @@ bashum_site_repo_ensure() {
 
 # usage: bashum_site_deploy <project_root>
 bashum_site_deploy() {
-	if (( $# != 1 ))
-	then
-		fail 'usage: bashum_site_deploy <project_root>'
-	fi
+    if (( $# != 1 ))
+    then
+        fail 'usage: bashum_site_deploy <project_root>'
+    fi
 
     if [[ ! -d $1 ]]
     then
         fail "That is not a directory [$1]"
     fi
 
-	(
+    (
         builtin cd $1 
 
-		local project_file="$(pwd)/$bashum_project_file"
-		if [[ ! -f $project_file ]]
-		then
-			fail "Unable to locate project file [$project_file]" 
-		fi
+        local project_file="$(pwd)/$bashum_project_file"
+        if [[ ! -f $project_file ]]
+        then
+            fail "Unable to locate project file [$project_file]" 
+        fi
 
         declare local name
         name=$(project_file_get_name $project_file) ||
@@ -100,37 +95,37 @@ bashum_site_deploy() {
                 fail "Error deploying file [$base_name] to [$site_repo_url]"
         ) || exit 1
 
-	) || exit 1
+    ) || exit 1
 }
 
 # usage: site_readme_build <project_root> [output_file]
 bashum_site_build() {
-	if (( $# < 1 ))
-	then
-		fail 'usage: site_readme_build <project_root> [output_file]'
-	fi
+    if (( $# < 1 ))
+    then
+        fail 'usage: site_readme_build <project_root> [output_file]'
+    fi
 
-	(
-		builtin cd $1 
+    (
+        builtin cd $1 
 
-		local project_file="$(pwd)/$bashum_project_file"
-		if [[ ! -f $project_file ]]
-		then
-			fail "Unable to locate project file [$project_file]" 
-		fi
+        local project_file="$(pwd)/$bashum_project_file"
+        if [[ ! -f $project_file ]]
+        then
+            fail "Unable to locate project file [$project_file]" 
+        fi
 
-		# cleanup the staging directory
-		local staging_dir=target/site-staging
-		if [[ -e $staging_dir ]]
-		then
-			rm -rf $staging_dir
-		fi
+        # cleanup the staging directory
+        local staging_dir=target/site-staging
+        if [[ -e $staging_dir ]]
+        then
+            rm -rf $staging_dir
+        fi
 
-		# go ahead and create the staging directory
-		if ! mkdir -p $staging_dir
-		then
-			fail "Error creating staging directory [$staging_dir]"
-		fi
+        # go ahead and create the staging directory
+        if ! mkdir -p $staging_dir
+        then
+            fail "Error creating staging directory [$staging_dir]"
+        fi
 
         declare local name
         name=$(project_file_get_name $project_file) ||
@@ -140,12 +135,12 @@ bashum_site_build() {
         version=$(project_file_get_version $project_file) ||
             fail "Error getting project version [$project_file]"
 
-		local author=$(project_file_get_author $project_file)
-		local email=$(project_file_get_email $project_file)
-		local description=$(project_file_get_description $project_file)
+        local author=$(project_file_get_author $project_file)
+        local email=$(project_file_get_email $project_file)
+        local description=$(project_file_get_description $project_file)
         
         # start making the site
-		local staging_file=$staging_dir/"$name"-"$version".md
+        local staging_file=$staging_dir/"$name"-"$version".md
         {
             echo "# ${name^^}-${version^^}"
             echo 
