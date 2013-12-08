@@ -1,3 +1,9 @@
+2.2.0:
+    release_date: 12-08-2013
+    changes: 
+		- Site build/deploy commands
+		- No longer killing test run if single test fails
+		- Preventing tmp dir from being shared between recursive command calls
 2.1.4:
     release_date: 12-03-2013
     changes: 
