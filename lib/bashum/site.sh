@@ -192,7 +192,7 @@ bashum_site_build() {
 
             printf '\x60\x60\x60\n' 
 
-            ( bashum test 2>&1 ) || fail "Cannot build site.  Error running tests" 
+            ( bashum test 2>&1 ) || true # don't fail the site if testing fails
 
             printf '\x60\x60\x60\n' 
             echo
