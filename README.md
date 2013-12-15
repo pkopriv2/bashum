@@ -22,6 +22,8 @@ and let me know how things are working.
 * *run*           - Runs an executable under the current bashum project.
 * *search*        - Searches the list of remote repositories for bashums to install.
 * *show*          - Shows a detailed view of a bashum pacage, a .bashum file or a remote file.
+* *site build*    - Builds the site in the current working directory (outputs to ./target)
+* *site deploy*   - Builds and deploys the site to a remote repository
 * *test*          - Runs a subset of tests for the project.
 
 # Dependencies
@@ -170,8 +172,11 @@ Example:
 	depends "stdlib" 
 	depends "other" "1.0.0"
 
-	snapshot_repo "git@github.com:pkopriv2/bashum-snapshot.git"
-	release_repo  "git@github.com:pkopriv2/bashum-main.git"
+	snapshot_repo      "git@github.com:pkopriv2/bashum-snapshot.git"
+	snapshot_site_repo "git@github.com:pkopriv2/bashum-snapshot-site.git"
+
+	release_repo       "git@github.com:pkopriv2/bashum-main.git"
+	release_site_repo  "git@github.com:pkopriv2/bashum-main-site.git"
 	
 	
 ## Requiring other files
