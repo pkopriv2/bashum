@@ -94,11 +94,11 @@ Windows:
 
 * Install the current version.
 	
-	curl https://raw.github.com/pkopriv2/bashum/master/install.sh | bash -s 
+	curl -L https://raw.github.com/pkopriv2/bashum/master/install.sh | bash -s 
 
 * Install a specific version.
 
-	curl https://raw.github.com/pkopriv2/bashum/master/install.sh | bash -s "1.0.0"
+	curl -L https://raw.github.com/pkopriv2/bashum/master/install.sh | bash -s "1.0.0"
 
 Resource your bash environment.  Usually, just start a new terminal session.
 
