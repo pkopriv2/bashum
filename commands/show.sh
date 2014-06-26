@@ -130,5 +130,5 @@ is_url() {
 		fail 'usage: is_url <expression>'
 	fi
 
-	echo $1 | grep -q '$http'; return $?
+	echo $1 | grep -q '^http'; return $?
 }
